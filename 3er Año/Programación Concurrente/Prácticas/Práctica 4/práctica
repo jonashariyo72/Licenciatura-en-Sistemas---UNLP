@@ -1,0 +1,700 @@
+1. Suponga que N clientes llegan a la cola de un banco y que serán atendidos por sus 
+empleados. Analice el problema y defina qué procesos, recursos y canales/comunicaciones 
+serán necesarios/convenientes para resolverlo. Luego, resuelva considerando las siguientes 
+situaciones: 
+
+a. Existe un único empleado, el cual atiende por orden de llegada.
+
+chan Atencion(int);
+chan Respuesta [0..N-1] (int);
+
+Process Cliente [id: 0..N-1]{
+    Respuesta R;
+    send Atencion (id);
+    receive Respuesta[id](R);
+}
+
+
+Process Empleado{
+    Respuesta R; int idC;
+    while (true){
+        receive Atencion(idC);
+        R := generoRespuesta();
+        send Respuesta[idC];
+    }
+}
+
+
+b. Ídem a) pero considerando que hay 2 empleados para atender, ¿qué debe 
+modificarse en la solución anterior? 
+
+chan Atencion(int);
+
+Process Cliente [id: 0..N-1]{
+    Respuesta R;
+    send Atencion (id);
+}
+
+
+Process Empleado[id:0..1]{
+    int idC;
+    while (true){
+        receive Atencion(idC);
+        atiendo (idC);
+    }
+}
+
+
+
+c. Ídem b) pero considerando que, si no hay clientes para atender, los empleados 
+realizan tareas administrativas durante 15 minutos. ¿Se puede resolver sin usar 
+procesos adicionales? ¿Qué consecuencias implicaría?
+
+Implicaría que al hacer el empty, quizas haya demora innecesaria cuando haya un solo pedido de atencion y dos empleados quieran acceder a eso.
+
+chan Atencion(int);
+chan Pedido (int);
+chan Siguiente[0..1] (texto);
+
+Process Cliente [id: 0..N-1]{
+    Respuesta R;
+    send Atencion (id);
+}
+
+
+Process Empleado[id:0..1]{
+    int idC;
+    while (true){
+        send Pedido(id);
+        if (!empty Siguiente[id]){
+            receive Siguiente[id](idC);
+            atiendo (idC);
+        }
+        else{
+            delay (900);
+        }
+    }
+}
+
+Process Coordinador{
+    Respuesta R; int idE; int idC;
+    while (true){
+        receive Pedido (idE)
+        if (!empty(Atencion)){
+            receive Atencion (idC);
+            send Siguiente[idE] (idC);
+        }
+    }
+}
+
+
+2. Se desea modelar el funcionamiento de un banco en el cual existen 5 cajas para realizar 
+pagos. Existen P clientes que desean hacer un pago. Para esto, cada una selecciona la caja 
+donde hay menos personas esperando; una vez seleccionada, espera a ser atendido. En cada 
+caja, los clientes son atendidos por orden de llegada por los cajeros. Luego del pago, se les 
+entrega un comprobante. Nota: maximizar la concurrencia. 
+
+
+chan pedirCaja (int);
+chan asignarCaja [0..P-1] (int);
+chan Atencion [0..4] (texto);
+chan recibirComprobante [0..P-1] (texto);
+chan liberarCaja (int);
+
+
+Process Cliente [id: 0..P-1]{
+    int numCaja; texto Pago; texto Comprobante;
+
+    send pedirCaja (id);
+    receive asignarCaja[id] (numCaja);
+    send Atencion [numCaja] (Pago);
+    receive recibirComprobante[id] (Comprobante);
+    send liberarCaja (numCaja);
+
+}
+
+Process Caja[id: 0..4]{
+    while true{
+        int idC; Comprobante C;
+        receive Atencion[id] (idC);
+        atiendoCliente (idC, C);
+        send recibirComprobante[idC] (C);
+    }
+}
+
+
+Process Admin{
+    int cajas[0..4] = {0,0,0,0,0};
+    int idC; int min; numCaja;
+
+    while (true){
+        if (!empty (liberarCaja)){
+            receive liberarCaja (numCaja);
+            cajas[numCaja]--;
+        }
+        receive pedirCaja (idC);
+        minimo (cajas,min);
+        send asignarCaja[idC] (min);
+        cajas[min]++; 
+    }
+
+} 
+
+
+3. Se debe modelar el funcionamiento de una casa de comida rápida, en la cual trabajan 2 
+cocineros y 3 vendedores, y que debe atender a C clientes. El modelado debe considerar 
+que: 
+- Cada cliente realiza un pedido y luego espera a que se lo entreguen. 
+
+- Los pedidos que hacen los clientes son tomados por cualquiera de los vendedores y se 
+lo pasan a los cocineros para que realicen el plato. Cuando no hay pedidos para atender, 
+los vendedores aprovechan para reponer un pack de bebidas de la heladera (tardan entre 
+1 y 3 minutos para hacer esto). 
+
+- Repetidamente cada cocinero toma un pedido pendiente dejado por los vendedores, lo 
+cocina y se lo entrega directamente al cliente correspondiente. 
+Nota: maximizar la concurrencia.
+
+
+chan Pedido (int);
+chan SigVendedor [0..2] (int);
+chan Cocinar (int);
+chan Cocina (int);
+chan Entrega[0..C-1](Pedido);
+chan Venta (int);
+
+
+Process Cocinero [id: 0..1]{
+    int idCliente; Pedido p;
+    while (true){
+        receive Cocinar (idCliente);
+        realizarPedido(p);
+        send Entrega[idCliente] (p);
+    }
+}
+
+
+Process Vendedor [id: 0..2]{
+    int idCliente;
+    while (true){
+        send Venta (id);
+        if (!empty (SigVendedor[id])){
+            receive SigVendedor[id](idCliente);
+            receive Cocina (idCocinero);
+            send Cocinar(idCliente);
+        }
+        else{
+            delay (120);
+        }
+
+    }
+}
+
+Process Admin{
+    int idCliente, idEmpleado;
+    while (true){
+        receive Venta(idEmpleado);
+        if (!empty(Pedido)){
+            receive Pedido(idCliente);
+            send SigVendedor[idEmpleado](idCliente);
+        }
+
+    }
+}
+
+
+Process Cliente [id: 0..C-1]{
+    Pedido p;
+    send Pedido (id);
+    receive Entrega[id] (p);
+}
+
+
+4. Simular la atención en un locutorio con 10 cabinas telefónicas, el cual tiene un empleado 
+que se encarga de atender a N clientes. Al llegar, cada cliente espera hasta que el empleado 
+le indique a qué cabina ir, la usa y luego se dirige al empleado para pagarle. El empleado 
+atiende a los clientes en el orden en que hacen los pedidos. A cada cliente se le entrega un 
+ticket factura por la operación. 
+
+a) Implemente una solución para el problema descrito. 
+
+chan Llegada (int);
+chan asignarCabina[0..N-1](int);
+chan Pago (int);
+chan recibirTicket[0..N-1](texto);
+
+Process Empleado{
+    int numCabina,idU,idP; texto ticket;
+    bool cabinasLibres [0..9];
+    while (true){
+        if (!empty (Llegada)){
+            receive Llegada (idU);
+            devolverCabinaLibre(cabinasLibres, numCabina);
+            send asignarCabina [idU] (numCabina);
+        }
+        if (!empty (Pago)){
+            receive Pago (idP);
+            Cobrar(idP,ticket);
+            send recibirTicket[idP] (ticket);
+        }
+    }
+}
+
+Process Cliente[id: 0..N-1]{
+    int numCabina; texto ticket;
+    send Llegada (id);
+    receive asignarCabina[id] (numCabina);
+    usarCabina(numCabina);
+    send Pago (id, numCabina);
+    receive recibirTicket[id] (ticket);
+}
+
+
+b) Modifique la solución implementada para que el empleado dé prioridad a los que 
+terminaron de usar la cabina sobre los que están esperando para usarla. 
+Nota: maximizar la concurrencia; suponga que hay una función Cobrar() llamada por el 
+empleado que simula que el empleado le cobra al cliente.
+
+
+
+5. Resolver la administración de 3 impresoras de una oficina. Las impresoras son usadas por N 
+administrativos, los cuales están continuamente trabajando y cada tanto envían documentos 
+a imprimir. Cada impresora, cuando está libre, toma un documento y lo imprime, de 
+acuerdo con el orden de llegada. 
+
+a) Implemente una solución para el problema descrito.
+
+chan Siguiente [0..2] (int);
+chan Pedido (int);
+chan Imprimir (Documento);
+
+Process Impresora [id:0..2]{
+    Documento doc;
+    while (true){
+        receive Envío (doc);
+        imprimir(doc);
+    } 
+}
+
+Process Admin [id: 0..N-1]{
+    Documento doc;
+    while (true){
+        // trabajar
+        send Envío (doc);
+    }
+}
+
+
+
+b) Modifique la solución implementada para que considere la presencia de un director de 
+oficina que también usa las impresas, el cual tiene prioridad sobre los administrativos.
+
+chan Pedido (int);
+chan ImprimirD (Documento);
+chan ImprimirA (Documento);
+
+Process Impresora [id:0..2]{
+    Documento doc;
+    while (true){
+        if (empty(ImprimirD)){
+            receive ImprimirA (doc);
+            imprimir(doc)
+        }
+        else{
+            receive ImprimirD (doc);
+            imprimir (doc);
+        }
+    } 
+}
+
+Process Admin [id: 0..N-1]{
+    Documento doc;
+    while (true){
+        // trabajar
+        send ImprimirA (doc);
+    }
+}
+
+Process Director {
+    Documento doc;
+    while (true){
+        // trabajar
+        send ImprimirD (doc);
+    }
+}
+
+
+
+c) Modifique la solución (a) considerando que cada administrativo imprime 10 trabajos y 
+que todos los procesos deben terminar su ejecución. 
+
+chan Pedido (int);
+chan ImprimirD (Documento);
+chan ImprimirA (Documento);
+
+Process Impresora [id:0..2]{
+    Documento doc;
+    for (i: 0..(N*10 -1)){
+        receive Envío (doc);
+        imprimir(doc);
+    }
+}
+
+Process Admin [id: 0..N-1]{
+    Documento doc;
+    for (i: 1..9){
+        send Imprimir (doc);
+    }
+}
+
+
+
+
+
+d) Modifique la solución (b) considerando que tanto el director como cada administrativo 
+imprimen 10 trabajos y que todos los procesos deben terminar su ejecución.
+
+
+
+
+
+
+
+
+
+e) Si la solución al ítem d) implica realizar Busy Waiting, modifíquela para evitarlo. 
+Nota: ni los administrativos ni el director deben esperar a que se imprima el documento.
+
+
+
+
+
+1. Suponga que existe un antivirus distribuido que se compone de R procesos robots 
+Examinadores y 1 proceso Analizador. Los procesos Examinadores están buscando 
+continuamente posibles sitios web infectados; cada vez que encuentran uno avisan la 
+dirección y luego continúan buscando. El proceso Analizador se encarga de hacer todas 
+las pruebas necesarias con cada uno de los sitios encontrados por los robots para determinar si 
+están o no infectados. 
+
+
+
+a) Analice el problema y defina qué procesos, recursos y comunicaciones serán 
+necesarios/convenientes para resolverlo. 
+
+
+
+Process Examinador [id: 0..R-1]{
+    SitioWeb sitio;
+    while (true){
+        buscarVirus(sitio);
+        Admin!reporte(sitio);
+    }
+}
+
+Process Analizador{
+    SitioWeb sitio;
+    whilev(true){
+        Examinador!pedido();
+        Examinador?reporte(sitio);
+        resolverVirus(sitio);
+    }
+
+}
+
+Process Admin {
+    cola buffer;
+    SitioWeb s;
+
+    while (true){
+        do Examinador[*]?reporte (sitio)  --> buffer.push (s);
+
+        not empty (buffer); Analizador?pedido() --> Analizador!reporte(pop(buffer));
+    }
+}
+
+
+
+b) Implemente una solución con PMS sin tener en cuenta el orden de los pedidos.
+
+
+
+c) Modifique el inciso (b) para que el Analizador resuelva los pedidos en el orden 
+en que se hicieron. 
+
+
+2. En un laboratorio de genética veterinaria hay 3 empleados. El primero de ellos 
+continuamente prepara las muestras de ADN; cada vez que termina, se la envía al segundo 
+empleado y vuelve a su trabajo. El segundo empleado toma cada muestra de ADN 
+preparada, arma el set de análisis que se deben realizar con ella y espera el resultado para 
+archivarlo. Por último, el tercer empleado se encarga de realizar el análisis y devolverle el 
+resultado al segundo empleado.
+
+
+
+Process Empleado1{
+    text muestra;
+    while(true){
+        muestra := prepararMuestra();
+        Admin!.envio(muestra);
+    }
+}
+
+Process Empleado2{
+    text muestra;
+    while(true){
+        Admin!pedido();
+        Admin?trabajo(muestra);
+        armarSet();
+        Empleado3!enviarMuestra(muestra);
+        Empleado3?analisis();
+    }
+}
+
+Process Empleado3{
+    text muestra;
+    do Empleado2?enviarMuestra (muestra) --> Empleado2!analisis (devolverAnalisis());
+
+}
+
+Process Admin{
+    cola buffer;
+    text muestra;
+
+    do Empleado1?envio (muestra)  --> buffer.push (muestra);
+
+    not empty (buffer); Empleado2?pedido() --> Empleado2!trabajo(pop(buffer));
+}
+
+
+3. En un examen final hay N alumnos y P profesores. Cada alumno resuelve su examen, lo 
+entrega y espera a que alguno de los profesores lo corrija y le indique la nota. Los 
+profesores corrigen los exámenes respetando el orden en que los alumnos van entregando.  
+a) Considerando que P=1. 
+
+Process Alumno[id:0..N-1]{
+    int miNota; text examen;
+    hacerExamen(examen);
+    Profesor!termine(examen,id);
+    Profesor?devolverNota(miNota);
+}
+
+Process Profesor{
+    int idAlumno, nota; text e;
+    for (i: 0..N-1){
+       Alumno[*]?.termine(e, idAlumno);
+       corregirExamen(idAlumno,nota);
+       Alumno[idAlumno]!.devolverNota(nota);
+    }
+}
+
+
+b) Considerando que P>1.
+
+Process Alumno[id:0..N-1]{
+    int miNota;
+    hacerExamen();
+    Admin!termine(examen,id);
+    Profesor?devolverNota(miNota);
+}
+
+Process Profesor[id:0..P-1]{
+    int idAlumno, nota; text examen;
+    bool ok := true;
+    while (ok){
+       Admin!pedido(id);
+       Admin?trabajo(examen,idAlumno);
+       if (idAlumno <> -1){
+        corregirExamen(idAlumno,nota);
+        Alumno[idAlumno]!.devolverNota(nota);
+       }
+       else{
+          ok := false;
+       }
+    }
+}
+
+Process Admin{
+    cola examenes;
+    text examen;
+    int idAlumno, idProfesor;
+    int P,N;
+
+    for (i: 0..N*2-1){
+        do Alumno[*]?termine (examen,idAlumno)  --> examenes.push (examen,idAlumno);
+
+        not empty (examenes); Profesor[*]?pedido(idProfesor) --> Profesor[idProfesor]!trabajo(examenes.pop(examen,id));
+    }
+
+    for (i: 0..P-1){
+        Profesor[i]!trabajo(-1);
+    }
+
+}
+
+c) Ídem b) pero considerando que los alumnos no comienzan a realizar su examen hasta 
+que todos hayan llegado al aula.
+
+Process Alumno[id:0..N-1]{
+    int miNota;
+    Admin!llegue();
+    Admin?empezar();
+    hacerExamen();
+    Admin!termine(examen,id);
+    Profesor?devolverNota(miNota);
+}
+
+Process Profesor[id:0..P-1]{
+    int idAlumno, nota; text examen;
+    bool ok := true;
+    while (ok){
+       Admin!pedido(id);
+       Admin?trabajo(examen,idAlumno);
+       if (idAlumno <> -1){
+        corregirExamen(idAlumno,nota);
+        Alumno[idAlumno]!.devolverNota(nota);
+       }
+       else{
+          ok := false;
+       }
+    }
+}
+
+Process Admin{
+    cola examenes;
+    text examen;
+    int llegada = 0;
+    int idAlumno, idProfesor;
+
+    for (i: 0..N-1){
+        Alumno[*]?llegue();
+    }
+
+    for (i: 0..N-1){
+        Alumno[i]!empezar();
+    }
+
+    for (i: 0..N*2-1){
+        do Alumno[*]?termine (examen,idAlumno)  --> examenes.push (examen,idAlumno);
+
+        not empty (examenes); Profesor[*]?pedido(idProfesor) --> Profesor[idProfesor]!trabajo(examenes.pop(examen,id));
+    }
+
+    for (i: 0..P-1){
+        Profesor[i]!trabajo(null,-1);
+    }
+}
+
+Nota: maximizar la concurrencia; no generar demora innecesaria; todos los procesos deben 
+terminar su ejecución
+
+4. En una exposición aeronáutica hay un simulador de vuelo (que debe ser usado con 
+exclusión mutua) y un empleado encargado de administrar su uso. Hay P personas que 
+esperan a que el empleado lo deje acceder al simulador, lo usa por un rato y se retira. 
+
+a) Implemente una solución donde el empleado sólo se ocupa de garantizar la exclusión 
+mutua (sin importar el orden).
+
+
+Process Persona [id: 0..P-1]{
+    Empleado!.llegue(id);
+    Empleado?empezar();
+    usarSimulador();
+    Empleado!.listo();
+}
+
+Process Empleado{
+    int idP;
+    while(true){
+        Persona?llegue(idP);
+        Persona[idP]!empezar();
+        Persona?listo();
+    }
+}
+
+
+b) Modifique la solución anterior para que el empleado los deje acceder según el orden de 
+su identificador (hasta que la persona i no lo haya usado, la persona i+1 debe esperar).
+
+
+Process Persona [id: 0..P-1]{
+    Empleado!.llegue();
+    Empleado?empezar();
+    usarSimulador();
+    Empleado!.listo();
+}
+
+Process Empleado{
+    int sig = 0;
+    while(true){
+        Persona[sig]?llegue();
+        Persona[sig]!empezar();
+        Persona[sig]listo();
+        sig++;
+    }
+}
+
+c) Modifique la solución a) para que el empleado considere el orden de llegada para dar 
+acceso al simulador.
+
+Process Persona [id: 0..P-1]{
+    Empleado!llegue(id);
+    Empleado?empezar();
+    usarSimulador();
+    Empleado!listo();
+}
+
+Process Empleado{
+    int idP; bool libre := true; cola llegada;
+    do Persona[*].llegue? --> 
+            if (libre){
+                libre := false;
+                Persona[idP]!empezar();
+            }
+            else{
+                llegada.push(idP);
+            }
+    [] Persona[*]?listo --> 
+            if (not empty llegada){
+                Persona[llegada.pop()]!.empezar;
+            }
+            else{
+                libre := true;
+            }
+}
+
+
+
+Nota: cada persona usa sólo una vez el simulador.   
+
+
+
+5. En un estadio de fútbol hay una máquina expendedora de gaseosas que debe ser usada por 
+E Espectadores de acuerdo con el orden de llegada. Cuando el espectador accede a la 
+máquina en su turno usa la máquina y luego se retira para dejar al siguiente. 
+Nota: cada Espectador una sólo una vez la máquina.
+
+Process Espectador [id: 0..E-1]{
+    Admin!llegue(id);
+    Admin?empezar();
+    // usar maquina
+    Admin!listo();
+}
+
+Process Admin{
+    int idP; bool libre := true; cola llegada;
+    do Espectador[*].llegue? --> 
+            if (libre){
+                libre := false;
+                Espectador[idP]!empezar();
+            }
+            else{
+                llegada.push(idP);
+            }
+    [] Espectador[*]?listo --> 
+            if (not empty llegada){
+                Espectador[llegada.pop()]!.empezar;
+            }
+            else{
+                libre := true;
+            }
+}

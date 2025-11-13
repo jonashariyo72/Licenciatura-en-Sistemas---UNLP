@@ -1,0 +1,64 @@
+1) Las unidades postales (UP) son sucursales de correo que se ocupan habitualmente de recibir y entregar paquetes. En 
+particular, la UP 16 sólo se ocupa de entregar paquetes a las personas que se presentan a retirarlos.  Los clientes son 
+atendidos por orden de llegada por el primer empleado que se encuentre libre.  Al solicitar atención, el cliente le 
+muestra un código QR al empleado que lo atiende, el cual le entrega el paquete como respuesta. Implemente un 
+programa que permita modelar el funcionamiento de la UP 16 usando PMA, asumiendo que hay N clientes que retiran 
+un único paquete y 3 empleados para atenderlos. Además, asuma que no habrá códigos QR erróneos ni paquetes 
+faltantes. Notas: la función obtenerQR(idCliente) retorna el código QR asociado al identificador de cliente recibido como 
+entrada. De forma similar, obtenerPaquete(qr) retorna el paquete asociado al QR recibido como entrada. 
+
+Process Cliente [id: 0..N-1]{
+    Paquete paquete;
+    Admin!Pedido (idC,obtenerQR(id));
+    Empleado[*]?Respuesta(paquete);
+}
+
+Process Empleado [id: 0..2]{
+    int idC; QR qr;
+    while (true){
+        Admin!Trabajo(id);
+        Admin?Siguiente(idC,qr);
+        Cliente[idC]!Respuesta(obtenerPaquete(qr));
+    }
+}
+
+Process Admin {
+    while (true){
+        int idC; QR qr; cola buffer;
+        do Cliente[*]?Pedido(id,qr) ---> buffer.push(id,qr);
+            not empty (buffer); Empleado[*]?Trabajo(idC) ---> Empleado[idC].Siguiente(buffer.pop(),buffer.pop())
+        od
+    }
+}
+
+1) En una oficina existen 100 empleados que envían documentos para imprimir en 5 impresoras 
+compartidas. Los pedidos de impresión son procesados por orden de llegada y se asignan a la primera 
+impresora que se encuentre libre: 
+ 
+b) Resuelva el problema anterior usando PMS.
+
+Process Empleado [id: 1..100]{
+    texto Doc;
+    Doc := generarDocumento ();
+    Admin!Pedido (idC,Doc);
+    Impresora[*]?Respuesta(Doc);
+}
+
+Process Impresora [id: 1..5]{
+    int idE; texto d;
+    while (true){
+        Admin!Trabajo(id);
+        Admin?Siguiente(idE,Doc);
+        imprimirDocumento (Doc);
+        Empleado[idE]!Respuesta(Doc);
+    }
+}
+
+Process Admin {
+    int idI,idE; texto d; cola buffer;
+    do Empleado[*]?Pedido(idE,d) ---> buffer.push(idE,d);
+        not empty (buffer); Impresora[*]?Trabajo(idI) --->  d := buffer.pop(); idE := buffer.pop();
+                                                                Impresora[idI]!Siguiente(idE,d);
+    
+    od
+}

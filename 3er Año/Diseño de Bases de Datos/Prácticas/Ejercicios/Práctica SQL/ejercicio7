@@ -1,0 +1,30 @@
+/* Club = (codigoClub, nombre, anioFundacion, codigoCiudad(FK)) 
+Ciudad = (codigoCiudad, nombre) 
+Estadio = (codigoEstadio, codigoClub(FK), nombre, direccion) 
+Jugador = (DNI, nombre, apellido, edad, codigoCiudad(FK)) 
+ClubJugador = (codigoClub (FK), DNI (FK), desde, hasta) 
+
+1. Reportar nombre y año de fundación de aquellos clubes de la ciudad de La Plata que no poseen 
+estadio. */
+
+SELECT c.nombre, anioFundacion
+FROM Club c 
+INNER JOIN Ciudad ciu ON (c.codigoCiudad = ciu.codigoCiudad)
+WHERE (ciu.nombre) = 'La Plata'
+AND NOT EXISTS (
+    SELECT 1
+    FROM Estadio e 
+    WHERE c.codigoClub = e.codigoClub
+)
+
+/* 2. Listar nombre de los clubes que no hayan tenido ni tengan jugadores de la ciudad de Berisso.  */
+
+SELECT c.nombre
+FROM Club c 
+NOT EXISTS (
+    SELECT 1 
+    FROM ClubJugador cj
+    INNER JOIN Jugador j ON (cj.DNI = j.DNI)
+    INNER JOIN Ciudad ciu ON (j.codigoCiudad = ciu.codigoCiudad)
+    WHERE (ciu.nombre) = 'Berisso'
+)

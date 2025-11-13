@@ -1,0 +1,89 @@
+Resuelva con ADA el siguiente problema: la página web del Banco Central exhibe las diferentes cotizaciones del dólar
+oficial de 20 bancos del país, tanto para la compra como para la venta. Existe una tarea programada que se ocupa de
+actualizar la página en forma periódica y para ello consulta la cotización de cada uno de los 20 bancos. Cada banco
+dispone de una API, cuya única función es procesar las solicitudes de aplicaciones externas. La tarea programada
+consulta de a una API por vez, esperando a lo sumo 5 segundos por su respuesta. Si pasado ese tiempo no respondió,
+entonces se mostrará vacía la información de ese banco.
+
+
+Procedure Banco is
+
+Task Tarea is
+
+end Tarea
+
+Task Type Banco is
+
+End Banco
+
+Task body Tarea is
+    i: integer;
+Begin
+    loop
+        for i := 1..20
+            SELECT 
+                Admin.Solicitar(i);
+            OR DELAY 5
+                write "Información del banco", i, "se encuentra vacía"
+            END SELECT
+        end for
+    end loop
+End Tarea
+
+Task body Banco is
+
+End Banco
+
+end Parcial1
+
+
+Parcial 2022)
+
+Procedure Banco is
+
+Task Empleado is
+    entry pedidoRegular (pago: IN texto; comprobante: OUT texto);
+    entry pedidoPremiun (pago: IN texto; comprobante: OUT texto);
+end Empleado
+
+Task Type Premiun is
+    arrPremiun: array (1..P) of Premiun;
+End Premiun
+
+Task Type Regular is
+    arrRegular: array (1..R) of Regular;
+End Regular
+
+Task body Empleado is
+    i: integer;
+Begin
+    loop
+        SELECT
+            accept pedidoPremiun (pago: IN texto; comprobante: OUT texto) do
+                comprobante := generarComprobante (pago);
+            end pedidoPremiun
+        OR
+            (when (pedidoPremiun'COUNT = 0)) accept pedidoRegular (pago: IN texto; comprobante: OUT texto) do
+                comprobante := generarComprobante (pago);
+            end pedidoRegular
+    end loop
+End Empleado
+
+Task body Premiun is
+    pago: texto;
+    c: texto;
+Begin
+    Empleado.pedidoPremiun (pago,c);
+End Premiun
+
+
+Task body Regular is
+    pago: texto;
+    c: texto;
+Begin
+    SELECT 
+        Empleado.pedidoRegular (pago,c)
+    OR DELAY 1800
+        null
+End Regular
+end Banco

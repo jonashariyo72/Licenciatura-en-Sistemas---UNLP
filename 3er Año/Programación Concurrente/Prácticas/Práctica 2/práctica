@@ -1,0 +1,759 @@
+Práctica 2 – Semáforos 
+
+
+
+
+
+1. Existen N personas que deben ser chequeadas por un detector de metales antes de poder ingresar al avión.  
+
+a. Analice el problema y defina qué procesos, recursos y semáforos/sincronizaciones 
+serán necesarios/convenientes para resolverlo. 
+
+b. Implemente una solución que modele el acceso de las personas a un detector (es decir, 
+si el detector está libre la persona lo puede utilizar; en caso contrario, debe esperar). 
+    
+    int N;
+    sem free = 1;
+
+    Process Persona[id:0..N-1]{
+        while(true){
+            P(free);
+            // detector libre, se chequea 
+            V(free);
+        }
+    }
+
+c. Modifique su solución para el caso que haya tres detectores.
+
+sem mutex = 3;
+sem libre = 1;
+
+    Process Persona[id:0..N-1]{
+        while(true){
+            P(libre)
+            P(mutex);
+            // detector libre, se chequea 
+            V(libre);
+        }
+    }
+
+
+d. Modifique la solución anterior para el caso en que cada persona pueda pasar más de 
+una vez, siendo aleatoria esa cantidad de veces. 
+
+        sem mutex = 3;
+        int random;
+
+        Process Persona[id:0..N-1]{
+        while(true){
+            for (0..random-1){
+                P(libre)
+                P(mutex);
+                // busco libre 
+                V(mutex);
+                // detector libre, se chequea 
+                V(libre);
+            }
+        }
+    }
+
+2. Un sistema de control cuenta con 4 procesos que realizan chequeos en forma 
+colaborativa. Para ello, reciben el historial de fallos del día anterior (por simplicidad, de 
+tamaño N). De cada fallo, se conoce su número de identificación (ID) y su nivel de 
+gravedad (0=bajo, 1=intermedio, 2=alto, 3=crítico).
+Resuelva considerando las siguientes situaciones: 
+
+a) Se debe imprimir en pantalla los ID de todos los errores críticos (no importa el 
+orden).
+
+    int N;
+    int p = 4;
+    fallos[N];
+    sem mutex = 1;
+    int i = 0;
+
+    Process Control[id:0..3]{
+        while (true){
+            Fallo fallo;
+            P (mutex);
+            if (i < N){
+                fallo = fallos.pop;
+                i++;
+                V(mutex);
+
+                if(fallo.nivel = 3) Imprimir(fallo);
+            }
+            else V(mutex);
+        }
+    }
+
+b) Se debe calcular la cantidad de fallos por nivel de gravedad, debiendo quedar los 
+resultados en un vector global.
+
+    total[0..3];
+    sem mutex = 1;
+    int i = 0;
+
+    
+    Process Control [id: 0..3]{
+        // asumo que el vector contador está inicializado en 0
+        while (true){
+            Fallo fallo;
+            P(mutex);
+            if (i < N){
+                fallo = fallos.pop;
+                i++;
+                total[fallo.nivel] = total [fallo.nivel]+ 1;
+                V(mutex);
+            }
+            else{V(mutex)}
+
+
+        }
+        
+    }
+
+c) Ídem b) pero cada proceso debe ocuparse de contar los fallos de un nivel de 
+gravedad determinado. 
+
+    total[0..3];
+    sem mutex = 1;
+    int i = 0;
+
+    
+total[0..3];        // inicializado en 0
+sem mutex = 1;      // protege la cola de fallos
+int i = 0;
+
+Process Control[id: 0..3] {
+    Fallo fallo;
+    while (true) {
+        P(mutex);
+        if (i < N) {
+            fallo = fallos.pop;   // Saco un fallo
+            i++;
+            V(mutex);
+
+            // Cada proceso solo se ocupa de su nivel
+            if (fallo.nivel == id) {
+                total[id] = total[id] + 1;
+            }
+
+        } else {V(mutex);}
+    }
+}
+// PREGUNTAR, QUE PASA SI SACO UN FALLO Y NO CORRESPONDE A ESE PROCESO?
+        
+3. Un sistema operativo mantiene 5 instancias de un recurso almacenadas en una cola. 
+Además, existen P procesos que necesitan usar una instancia del recurso. Para eso, deben 
+sacar la instancia de la cola antes de usarla. Una vez usada, la instancia debe ser encolada 
+nuevamente para su reúso.
+
+    cola [5];
+    int P;
+    sem mutex = 1;
+    sem libres = 5;
+
+    Process Proceso[id: 0..P-1] {
+    while (true) {
+        Recurso recurso;
+        P(libres);
+        P(mutex);
+        recurso = cola.pop();
+        V(mutex);
+        // usa el recurso
+        P(mutex);
+        cola.push(recurso);
+        V(mutex);
+        V(libres);
+    }
+}
+
+
+4) Suponga que existe una BD que puede ser accedida por 6 usuarios como máximo al 
+mismo tiempo. Además, los usuarios se clasifican como usuarios de prioridad alta y 
+usuarios de prioridad baja. Por último, la BD tiene la siguiente restricción: 
+• no puede haber más de 4 usuarios con prioridad alta al mismo tiempo usando la BD. 
+• no puede haber más de 5 usuarios con prioridad baja al mismo tiempo usando la BD. 
+Indique si la solución presentada es la más adecuada. Justifique la respuesta.  
+
+RTA: Habría que cambiar P(total) por P(alta). Porque si entran todos de prioridad ALTA y bloquean la BD porque la total no discrimina y estarían bloqueando la BD cuando todavia pueden entrar algunos de prioridad BAJA.
+
+5. En una empresa de logística de paquetes existe una sala de contenedores donde se 
+preparan las entregas. Cada contenedor puede almacenar un paquete y la sala cuenta con 
+capacidad para N contenedores. Resuelva considerando las siguientes situaciones: 
+
+a) La empresa cuenta con 2 empleados: un empleado Preparador que se ocupa de 
+preparar los paquetes y dejarlos en los contenedores; un empelado Entregador 
+que se ocupa de tomar los paquetes de los contenedores y realizar la entregas. 
+Tanto el Preparador como el Entregador trabajan de a un paquete por vez.
+
+sem vacio = 1; lleno = 0;
+cola[N-1];
+
+
+
+Process Preparador {
+    while (true){
+        Paquete paquete;
+        preparo el paquete;
+        P(vacio);
+        cola.push(paquete);
+        V(lleno);
+
+
+    }
+}
+
+
+Process Entregador{
+    while true{
+        Paquete paquete;
+        P(lleno);
+        paquete = cola.pop();
+        V(vacio);
+        realizo la entrega;
+    }
+
+}
+
+b) Modifique la solución a) para el caso en que haya P empleados Preparadores. 
+
+sem vacio = 1; lleno = 0;
+sem libres = 1;
+cola[N-1];
+
+
+
+Process Preparador[id: 0..P-1] {
+    while (true){
+        Paquete paquete;
+        preparo el paquete;
+        P(vacio);
+        P(libres);
+        cola.push(paquete);
+        V(libres);
+        V(lleno);
+
+
+    }
+}
+
+
+Process Entregador{
+    while true{
+        Paquete paquete;
+        P(lleno);
+        paquete = cola.pop();
+        V(vacio);
+        realizo la entrega;
+    }
+
+}
+
+c) Modifique la solución a) para el caso en que haya E empleados Entregadores. 
+
+sem vacio = 1; lleno = 0;
+sem libres = 1;
+cola[N-1];
+
+
+
+Process Preparador[id: 0..P-1] {
+    while (true){
+        Paquete paquete;
+        preparo el paquete;
+        P(vacio);
+        cola.push(paquete);
+        V(lleno);
+
+
+    }
+}
+
+
+Process Entregador{
+    while true{
+        Paquete paquete;
+        P(lleno);
+        P(libres);
+        paquete = cola.pop();
+        V(libres);
+        V(vacio);
+        realizo la entrega;
+    }
+
+}
+
+d) Modifique la solución a) para el caso en que haya P empleados Preparadores y E 
+empleadores Entregadores. 
+
+
+sem vacio = 1; lleno = 0;
+sem libres1 = 1; sem libres2 = 1;
+cola[N-1];
+
+
+
+Process Preparador[id: 0..P-1] {
+    while (true){
+        Paquete paquete;
+        preparo el paquete;
+        P(vacio);
+        P(libres1);
+        cola.push(paquete);
+        V(libres1);
+        V(lleno);
+
+
+    }
+}
+
+
+Process Entregador{
+    while true{
+        Paquete paquete;
+        P(lleno);
+        P(libres2);
+        paquete = cola.pop();
+        V(libres2);
+        V(vacio);
+        realizo la entrega;
+    }
+
+}
+
+
+
+6. Existen N personas que deben imprimir un trabajo cada una. Resolver cada ítem usando 
+semáforos: 
+
+a) Implemente una solución suponiendo que existe una única impresora compartida por 
+todas las personas, y las mismas la deben usar de a una persona a la vez, sin importar 
+el orden. Existe una función Imprimir(documento) llamada por la persona que simula el 
+uso de la impresora. Sólo se deben usar los procesos que representan a las Personas. 
+
+sem mutex = 1;
+
+Process Persona[id: 0..N-1]{
+    while(true){
+        Documento documento;
+        P(mutex);
+        Imprimir(documento);
+        V(mutex);
+    }
+}
+
+
+
+
+b) Modifique la solución de (a) para el caso en que se deba respetar el orden de llegada.
+
+colaLlegada c;
+sem espera[P] = ([P] 0);
+sem mutex = 1;
+bool libre = true;
+
+Process persona [id:0..P-1]{
+    Documento documento;
+    int aux;
+    P(mutex);
+    if (libre){
+        libre = false;
+        V(mutex);
+    } 
+    else {
+        c.push(id);
+        V(mutex);
+        P(espera[id]);
+    }
+    Imprimir(documento);
+    P(mutex);
+    if (c.isEmpty()){
+        libre = true;
+    } else {
+        aux = c.pop();
+        V(espera[aux]);
+    }
+    V(mutex);
+}
+
+c) Modifique la solución de (a) para el caso en que se deba respetar estrictamente el 
+orden dado por el identificador del proceso (la persona X no puede usar la impresora 
+hasta que no haya terminado de usarla la persona X-1).
+
+    sem mutex = 1;
+    sem espera[P] = ([P] 0);
+    int i = 0;
+
+    Process Persona[id: 0..N-1]{
+        while(true){
+            Documento documento;
+            P(espera[id]);
+            P(mutex);
+            Imprimir(documento);
+            i++;
+            V(mutex);
+            V(espera[i0]);
+        }
+    }
+
+
+d) Modifique la solución de (b) para el caso en que además hay un proceso Coordinador 
+que le indica a cada persona que es su turno de usar la impresora.
+
+    sem mutex = 1;
+    sem espera[P] = ([P] = 0);
+    sem listo = 0;
+    int i = 0;
+
+    Process Persona[id: 0..N-1]{
+        while(true){
+            Documento documento;
+            P(espera[id]);
+            Imprimir(documento);
+            V(listo);
+        }
+    }
+
+    Process Coordinador{
+        while(libre){
+            P(mutex);
+            int i = turno;
+            V(mutex);
+            
+            V(espera[i]);
+            P(listo);
+
+            P(mutex);
+            turno++;
+            V(mutex);
+        }
+    }
+
+
+e) Modificar la solución (d) para el caso en que sean 5 impresoras. El coordinador le 
+indica a la persona cuando puede usar una impresora, y cual debe usar.  
+
+sem mutex = 1;
+sem mutex = 1;
+sem espera[N] = {0,...,0};
+sem listo = 0;
+cola impresoras = {0,1,2,3,4};   // 5 impresoras
+int turno = 0;
+
+Process Persona[id: 0..N-1] {
+    while(true) {
+        P(espera[id]);                   // espera turno
+        P(mutex);
+        int imp = cola.pop();            // coordinador ya le dijo cuál
+        V(mutex);
+
+        Imprimir(documento, imp);        // usa esa impresora
+
+        P(mutex);
+        cola.push(imp);                  // libera la impresora
+        V(mutex);
+
+        V(listo);                        // avisa al coordinador
+    }
+}
+
+Process Coordinador {
+    while(true) {
+        P(mutex);
+        int i = turno;
+        turno = (turno+1)%N;             // siguiente persona
+        V(mutex);
+
+        V(espera[i]);                    // despierta persona i
+        P(listo);                        // espera que termine
+    }
+}
+
+
+7. Suponga que se tiene un curso con 50 alumnos. Cada alumno debe realizar una tarea y existen 10 enunciados posibles. Una vez que todos los alumnos eligieron su tarea, 
+comienzan a realizarla. Cada vez que un alumno termina su tarea, le avisa al profesor y se queda esperando el puntaje del grupo (depende de todos aquellos que comparten el 
+mismo enunciado). Cuando un grupo terminó, el profesor les otorga un puntaje que representa el orden en que se terminó esa tarea de las 10 posibles.
+Nota: Para elegir la tarea suponga que existe una función elegir que le asigna una tarea a un alumno (esta función asignará 10 tareas diferentes entre 50 alumnos, es decir, que 5 
+alumnos tendrán la tarea 1, otros 5 la tarea 2 y así sucesivamente para las 10 tareas). 
+
+
+
+sem grupo [10] = {0,...,0};
+int contador = 0;
+sem mutex = 1;
+sem barrera = 0;
+bool seguir = true;
+int fin = 0;
+cola c ;
+sem listo = 0;
+sem puntajes [10] = {0,...,0};
+int notas [10] = {0,...,0};
+
+
+Process Alumno {
+    int miNota;
+    int tarea = elegir();
+    P(mutex);
+    contador++;
+    if (contador == 50){
+        for i = 1..50{V(barrera);}
+    }
+    V(mutex);
+    P(barrera);
+    hacerTarea();
+    P(mutex);
+    c.push (tarea);
+    V(mutex);
+    V(listo); // libera y avisa al profesor.
+
+
+    P(puntajes[tarea]); // espero que el profesor corrija.
+    miNota = notas[tarea]; // recibo la nota del grupo.
+}
+
+Process Profesor {
+    int cant [10] = {0,...,0};
+    int num;
+    int contadorFin = 10;
+    int i;
+
+    while (seguir){
+        P(listo);
+        P(mutex);
+        num = c.pop();
+        V(mutex);
+        cant[num]++;
+        if (cant[num] == 5){
+            notas[num] = contadorFin;
+            for i = 1..5{
+                V(puntajes[num]);
+            }
+            contadorFin--;
+        }
+        if (contadorFin == 0) seguir = false;
+    }
+
+}
+
+
+
+8. Una fábrica de piezas metálicas debe producir T piezas por día. Para eso, cuenta con E 
+empleados que se ocupan de producir las piezas de a una por vez. La fábrica empieza a 
+producir una vez que todos los empleados llegaron. Mientras haya piezas por fabricar, los 
+empleados tomarán una y la realizarán. Cada empleado puede tardar distinto tiempo en 
+fabricar una pieza. Al finalizar el día, se debe conocer cual es el empleado que más piezas 
+fabricó.
+
+a) Implemente una solución asumiendo que T > E. 
+b) Implemente una solución que contemple cualquier valor de T y E.
+
+int cant = 0;
+int T;
+int E;
+int llegada = 0;
+sem mutex = 1;
+sem barrera = 0;
+cola piezas[T];
+pieza p;
+
+a)
+Process Empleado{
+    int cant_personal = 0;
+
+    P(mutex);
+    llegada++;
+    if (llegada == E){
+        for: (i..E){
+            V(barrera);
+        }
+    }
+    V(mutex);
+    P(barrera);
+    P(mutex);
+    while (cant<T){
+        p = piezas.pop();
+        cant++;
+        V(mutex);
+        trabajarPieza();
+        cant_personal++;
+        P(mutex);
+    }
+    V(mutex);
+    
+
+
+}
+
+
+b)
+
+Process Empleado{
+
+
+}
+
+
+9. Resolver el funcionamiento en una fábrica de ventanas con 7 empleados (4 carpinteros, 1 
+vidriero y 2 armadores) que trabajan de la siguiente manera:
+
+• Los carpinteros continuamente hacen marcos (cada marco es armando por un único 
+carpintero) y los deja en un depósito con capacidad de almacenar 30 marcos.
+
+• El vidriero continuamente hace vidrios y los deja en otro depósito con capacidad para 
+50 vidrios.
+
+• Los armadores continuamente toman un marco y un vidrio (en ese orden) de los 
+depósitos correspondientes y arman la ventana (cada ventana es armada por un único 
+armador).
+
+
+cola marcos [30];
+cola vidrios [50];
+sem mutexM = 1;
+sem mutexV = 1;
+sem espera_marcos = 30;
+sem existen_marcos = 0;
+sem espera_vidrios = 50;
+sem existen_vidrios = 0;
+
+
+Process Carpintero [id: 0..3]{
+    while(true){
+        marco m;
+        hacerMarco(m);
+        P(espera_marcos);
+        P(mutexM);
+        marcos.push(m);
+        V(mutexM);
+        V(existen_marcos);
+    }
+}
+
+Process Vidriero [id: 0..0]{
+    while(true){
+        vidrio v;
+        hacerVidrio(v);
+        P(espera_vidros);
+        P(mutexV);
+        vidrios.push(v);
+        V(mutexV);
+        V(existen_vidrios);
+    }
+}
+
+Process Armadores [id: 0..1]{
+    marco m;
+    vidrio v;
+
+    while (true){
+        P(existen_marcos);
+        P(mutexM);
+        m = marcos.pop()
+        V(mutexM);
+        V(espera_marcos);
+
+        P(existen_vidrios);
+        P(mutexV);
+        v = vidrios.pop()
+        V(mutexV);
+        V(espera_vidrios);
+
+        // hacer ventana
+    }
+
+10.  A una cerealera van T camiones a descargarse trigo y M camiones a descargar maíz. Sólo 
+hay lugar para que 7 camiones a la vez descarguen, pero no pueden ser más de 5 del mismo 
+tipo de cereal.  
+
+
+b) Implemente una solución que no use procesos adicionales (sólo camiones). No 
+importa el orden de llegada para descargar. Nota: maximice la concurrencia. 
+
+    int T;
+    int M;
+    sem total = 7;
+    sem maiz = 5;
+    sem trigo = 5;
+
+
+
+
+    Process Trigo[id: 0..T-1]{
+        P(trigo);
+        P(total);
+        descargar();
+        V(total);
+        V(trigo);
+
+    }
+
+
+    Process Maíz[id: 0..M-1]{
+        P(maíz);
+        P(total);
+        descargar();
+        V(total);
+        V(maíz);
+    }
+
+11. En un vacunatorio hay un empleado de salud para vacunar a 50 personas. El empleado 
+de salud atiende a las personas de acuerdo con el orden de llegada y de a 5 personas a la 
+vez. Es decir, que cuando está libre debe esperar a que haya al menos 5 personas 
+esperando, luego vacuna a las 5 primeras personas, y al terminar las deja ir para esperar 
+por otras 5. Cuando ha atendido a las 50 personas el empleado de salud se retira. Nota: 
+todos los procesos deben terminar su ejecución; suponga que el empleado tienen una 
+función VacunarPersona() que simula que el empleado está vacunando a UNA persona.
+
+cola llegada[50];
+sem liberar[50] = 0;
+sem libre = 0;
+bool seguir = true;
+int cant = 0;
+sem mutex = 1;
+sem barrera = 5;
+
+Process Empleado{
+    Persona p;
+    for (1..10){
+        P(libre)
+        for (i..5){
+            P(mutex);
+            cola.pop(p);
+            VacunarPersona(p);
+            V(liberar[p]);
+            V(mutex);
+        }
+
+    }
+
+
+
+}
+
+Process Persona[id: 0..49]{
+    P(mutex);
+    llegada.push(this);
+    V(mutex);
+
+    P(mutexCant)
+    cant++;
+    if (cant=5){
+        V(libre);
+        cant = 0;
+    }
+    V(mutexCant);
+
+
+
+    P(liberar[p])
+
+
+}
+
+
+    
+}
+
+

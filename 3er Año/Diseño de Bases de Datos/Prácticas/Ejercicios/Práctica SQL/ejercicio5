@@ -1,0 +1,84 @@
+/* 
+Agencia = (razon_social, dirección, telef, email) 
+Ciudad = (codigo_postal, nombreCiudad, anioCreacion) 
+Cliente = (dni, nombre, apellido, telefono, direccion) 
+Viaje = (fecha, hora, dni (fk), cpOrigen(fk), cpDestino(fk), razon_social(fk), descripcion) //cpOrigen y 
+cpDestino corresponden a la ciudades origen y destino del viaje
+
+1. Listar razón social, dirección y teléfono de agencias que realizaron viajes desde la ciudad de ‘La 
+Plata’ (ciudad origen) y que el cliente tenga apellido ‘Roma’. Ordenar por razón social y luego por 
+teléfono.  */
+
+SELECT a.razon_social, a.direccion, telef
+FROM Agencia a
+INNER JOIN Viaje v ON (a.razon_social = v.razon_social)
+INNER JOIN Ciudad c ON (v.cpOrigen = c.codigo_postal)
+INNER JOIN Cliente cli ON (v.dni = cli.dni)
+WHERE (nombreCiudad) = 'La Plata' AND (apellido) = 'Roma'
+ORDER BY razon_social, telef
+
+/* 2. Listar fecha, hora, datos personales del cliente, nombres de ciudades origen y destino de viajes 
+realizados en enero de 2019 donde la descripción del viaje contenga el String ‘demorado’. */
+
+SELECT v.fecha, v.hora, c.dni, c.nombre, c.apellido, c.telefono, c.direccion, origen.nombreCiudad, destino.nombreCiudad, v.descripcion as NombreDeLaDescripcion
+FROM Cliente c 
+INNER JOIN Viaje v ON (c.dni = v.dni)
+INNER JOIN Ciudad origen ON (v.cpOrigen = origen.codigo_postal)
+INNER JOIN Ciudad destino ON (v.cpDestino = destino.codigo_postal)
+WHERE YEAR(v.fecha) = '2019'AND (v.descripcion LIKE '%demorado%')
+
+/* 3. Reportar información de agencias que realizaron viajes durante 2019 o que tengan dirección de 
+mail que termine con  ‘@jmail.com’.  */
+
+SELECT a.razon_social, a.direccion, telef
+FROM Agencia a
+INNER JOIN Viaje v ON (a.razon_social = v.razon_social)
+WHERE YEAR(v.fecha) = '2019' OR (a.email LIKE '%jmail.com')
+
+/* 4. Listar datos personales de clientes que viajaron solo con destino a la ciudad de ‘Coronel 
+Brandsen’  */
+
+SELECT c.dni, c.nombre, c.apellido, c.telefono, c.direccion
+FROM Cliente c 
+INNER JOIN Viaje v ON (c.dni = v.dni)
+INNER JOIN Ciudad destino ON (v.cpDestino = destino.codigo_postal)
+WHERE (destino.nombreCiudad) = 'Coronel Brandsen'
+EXCEPT
+SELECT c.dni, c.nombre, c.apellido, c.telefono, c.direccion
+FROM Cliente c 
+INNER JOIN Viaje v ON (c.dni = v.dni)
+INNER JOIN Ciudad destino ON (v.cpDestino = destino.codigo_postal)
+WHERE (destino.nombreCiudad) <> 'Coronel Brandsen'
+
+/* 5. Informar cantidad de viajes de la agencia con razón social ‘TAXI Y’ realizados a ‘Villa Elisa’. */
+
+SELECT COUNT(*) as cantViajes
+FROM Agencia a
+INNER JOIN Viaje v ON (a.razon_social = v.razon_social)
+INNER JOIN Ciudad destino ON (v.cpDestino = destino.codigo_postal)
+WHERE (a.razon_social) = 'TAXI Y' AND (destino.nombreCiudad) = 'Villa Elisa'
+
+
+/* 6. Listar nombre, apellido, dirección y teléfono de clientes que viajaron con todas las agencias. */ 
+
+SELECT c.dni, c.nombre, c.apellido, c.telefono, c.direccion
+FROM Cliente c
+INNER JOIN Viaje v ON (c.dni = v.dni)
+GROUP BY c.dni, c.nombre, c.apellido, c.telefono, c.direccion
+HAVING COUNT(DISTINCT v.razon_social) = (SELECT COUNT(*) FROM Agencia)
+
+/* 8. Listar razón social, dirección y teléfono de la/s agencias que tengan mayor cantidad de viajes 
+realizados. */
+
+SELECT a.razon_social, a.direccion, a.telefono
+FROM Agencia a
+INNER JOIN Viaje v ON a.razon_social = v.razon_social
+GROUP BY a.razon_social, a.direccion, a.telefono
+HAVING COUNT(*) = (
+    SELECT MAX(CantViajes)
+    FROM (
+        SELECT COUNT(*) AS CantViajes
+        FROM Viaje
+        GROUP BY razon_social
+    ) AS Sub
+)

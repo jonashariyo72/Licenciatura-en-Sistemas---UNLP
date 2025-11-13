@@ -1,0 +1,66 @@
+Parcial del 2020 de SEMÁFOROS. Tema 6.
+
+sem esperoNumero = 30;
+sem llegar = 1;
+cola llegada [30];
+int idGlobal = 0;
+int numGrupo [30] = {0,0,0...};
+sem trabajar [3] = {1,1,1};
+int trabajosHechos [30] = {0,0,0...};
+
+Process Empleado [id:0..9]{
+    int cantGrupo = 0;
+    int contador = 0;
+    sem mutex = 1;
+    sem barrera = 0;
+
+    P(llegar);
+    idGlobal++;
+    llegada.push(idGlobal);
+    V(llegar);
+
+
+    P(esperoNumero);
+
+    P(grupo);
+    while (cantGrupo < 345){
+        V (grupo);
+        Generar();
+        trabajosHechos[idGlobal]++;
+        P(grupo);
+        cantGrupo++;
+    }
+    V(grupo);
+
+    P(mutex);
+    contador++;
+    if (contador == 10){
+        for i = 1..10{V(barrera);}
+    }
+    V(mutex);
+    P(barrera);
+}
+
+
+Process Coordinador{
+    int cant = 0;
+    int emp;
+
+    for (i: 0..30){
+        cant++;
+        P(llegar);
+        emp = llegada.pop();
+        V(llegar);
+        if (cant <= 10) numGrupo[emp] = 1;
+        else if (cant <= 20) numGrupo[emp] = 2;
+        else numGrupo[emp] = 3;
+    }
+
+    for (i: 0..30){
+        V(esperoNumero);
+    }
+
+    ???máximo
+
+
+}

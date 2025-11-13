@@ -1,0 +1,70 @@
+3) Resolver el siguiente problema con PMA. En un negocio de cobros digitales hay P personas que 
+deben pasar por la única caja de cobros para realizar el pago de sus boletas. Las personas son 
+atendidas de acuerdo con el orden de llegada, teniendo prioridad aquellos que deben pagar menos 
+de 5 boletas de los que pagan más. Adicionalmente, las personas embarazadas tienen prioridad sobre 
+los dos casos anteriores. Las personas entregan sus boletas al cajero y el dinero de pago; el cajero les 
+devuelve el vuelto y los recibos de pago. 
+
+chan EntrarMenosBoletas (int, boletas, dinero);
+chan EntrarEmbarazadas (int, boletas, dinero);
+chan EntrarNormal (int, boletas, dinero);
+chan Respuesta [] (recibo);
+chan AvisoGeneral ();
+
+Process Persona [id: 0..P-1]{
+    int boletas;
+    if (soyEmbarazada()){
+        send EntrarEmbarazadas (id, boletas, dinero);
+    }
+    else if (boletas < 5){
+        send EntrarMenosBoletas(id, boletas, dinero);
+    }
+    else EntrarNormal (id, boletas, dinero);
+
+    send AvisoGeneral ();
+    receive Respuesta [id](recibo);
+}
+
+Process Cajero[]{
+    for i=1..P{
+        receive aviso();
+        if (not empty(atencionEmbarazada)) -> 
+            receive EntrarEmbarazadas(idP,b,d);
+        [] (not empty(atencionMenos5Boletas) && empty(atencionEmbarazada)) ->
+            receive EntrarMenosBoletas(idP,b,d);
+        [] (not empty (atencionGeneral) && empty (atencionEmbarazada) && empty (atencionMenos5Boletas)) -> 
+            receive AvisoGeneral(idP,b,d);
+        fi
+        realizarPago(b,d,v,r);
+        send Respuesta[id](v,r);
+    }
+}
+
+
+1) En una oficina existen 100 empleados que envían documentos para imprimir en 5 impresoras 
+compartidas. Los pedidos de impresión son procesados por orden de llegada y se asignan a la primera 
+impresora que se encuentre libre: 
+a) Implemente un programa que permita resolver el problema anterior usando PMA. 
+
+chan enviarDocumento (int,texto);
+chan devolverDocumento [] (texto);
+
+Process Empleado [id: 1..100]{
+    text Doc;
+    Doc := generarDocumento();
+    send enviarDocumento (Doc);
+    receive devolverDocumento[idE](Doc);
+}
+
+Process Impresora [id: 1..5]{
+    text d; int idE;
+    while (true){
+        receive enviarDocumento (d,id);
+        send devolverDocumento[idE] (d);
+    }
+}
+
+
+
+
+

@@ -1,0 +1,26 @@
+Process Paciente (id: 0..14){
+    texto Tratamiento;
+    Admin!Llegada(idP);
+    Medico?Listo(Tratamiento);
+}
+
+
+Process Medico {
+    int idP; texto Tratamiento
+    for (i: 1..15){
+        Admin!Trabajo();
+        Admin?Atencion(idP);
+        atenderPaciente(idP,Tratamiento);
+        Paciente[idP]!Listo(Tratamiento);
+    }
+}
+
+Process Admin {
+    cola llegada; int i,idP;
+    for (i: 1..30){
+         if Paciente[*]?Llegada(idP) ---> llegada.push(idP);
+            
+            not empty (llegada); Medico?Trabajo() ---> Medico!Atencion(llegada.pop());
+        fi
+    }
+}

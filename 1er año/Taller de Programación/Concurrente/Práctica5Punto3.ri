@@ -1,0 +1,89 @@
+programa Práctica5Punto3
+procesos
+  proceso vaciarBolsa (E flores: numero)
+  variables
+    avR: numero
+    caR: numero
+  comenzar
+    avR := PosAv
+    caR := PosCa
+
+    BloquearEsquina (10,10)
+    Pos (10,10)
+    repetir flores
+      depositarFlor
+    Pos (avR,caR)
+    LiberarEsquina (10,10)
+    EnviarMensaje (1,jefe)
+  fin
+  
+  proceso recolectar (ES flores: numero)
+  variables
+    esq: numero
+  comenzar
+    repetir 99
+      mientras (HayFlorEnLaEsquina) 
+        tomarFlor
+        flores := flores + 1
+        si (flores = 10)
+          vaciarBolsa (flores)
+          flores := 0
+      mover
+      esq := esq + 1
+      si (esq = 5)
+        vaciarBolsa (flores)
+        flores := 0
+        esq := 0
+    mientras (HayFlorEnLaEsquina) 
+      tomarFlor
+      flores := flores + 1
+      si (flores = 10)
+        vaciarBolsa (flores)
+        flores := 0
+  fin
+    
+areas
+  ciudad: AreaC(1,1,100,100)
+robots
+  robot florero
+  variables
+    flores: numero
+  comenzar
+    flores := 0
+    recolectar (flores)
+    EnviarMensaje (0,jefe)
+  fin
+
+  robot cosechador
+  variables
+    flores: numero
+    ok: numero
+    termino: numero
+    avR: numero
+    caR: numero
+  comenzar
+    avR := PosAv
+    caR := PosCa
+    termino := 0
+    flores := 0
+    mientras (termino < 2)
+      RecibirMensaje (ok,*)
+      si (ok = 1)
+        BloquearEsquina (10,10)
+        Pos (10,10)
+        mientras (HayFlorEnLaEsquina)
+          tomarFlor
+          flores := flores + 1
+        Pos (avR,caR)
+        LiberarEsquina (10,10)
+      sino
+        termino := termino + 1
+    Informar (flores)
+  fin
+  
+variables
+  Rinfo: robot1
+comenzar
+  AsignarArea(Rinfo,ciudad)
+  Iniciar(Rinfo,1,1)
+fin

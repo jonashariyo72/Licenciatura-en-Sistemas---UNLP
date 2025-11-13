@@ -1,0 +1,41 @@
+/* 1. Listar todos los libros cuyo precio es mayor a $2300 */
+
+SELECT titulo
+FROM Libro l
+WHERE (l.precio) > '2300'
+
+
+/* 2. Listar todas las ventas realizadas en 2023 */
+
+SELECT *
+FROM Venta v
+WHERE (v.fecha) >= '2023-08-01' AND (v.fecha) <= '2023-08-31'
+
+/* 3. Listar nombre, apellido, dni, telefono y direccion de clientes que realizaron compras solamente durante el año 2022 */
+
+SELECT nombre, apellido, DNI, telefono, direccion
+FROM Cliente c 
+INNER JOIN Venta v ON (c.idCliente = v.idCliente)
+WHERE (YEAR(v.fecha)) = '2022'
+EXCEPT 
+SELECT nombre, apellido, DNI, telefono, direccion
+FROM Cliente c 
+INNER JOIN Venta v ON (c.DNI = v.DNI)
+WHERE (YEAR(v.fecha)) <> '2022'
+
+/* 4. Listar para cada libro el titulo, autor, precio y la cantidad total de veces que fue vendido */
+
+SELECT titulo, autor, precio, SUM (d.cantidad) as cantVentas
+FROM Libro l 
+INNER JOIN DetalleVenta d ON (l.idLibro = d.idLibro)
+GROUP BY l.idLibro, l.titulo, l.autor, l.precio
+
+/* 5. Listar nroVenta, total, fecha, hora y DNI del cliente, de aquellas ventas donde se haya vendido al menos un libro con precio mayor a 1000 */
+
+
+SELECT nroVenta, total, fecha, hora, c.DNI
+FROM Venta v 
+INNER JOIN Cliente c (v.idCliente = c.idCliente)
+INNER JOIN DetalleVenta d (v.nroVenta = d.nroVenta)
+INNER JOIN Libro l (d.idLibro = l.idLibro)
+WHERE precio > 1000

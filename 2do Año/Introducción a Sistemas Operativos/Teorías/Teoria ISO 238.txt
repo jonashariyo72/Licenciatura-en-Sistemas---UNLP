@@ -1,0 +1,9 @@
+Teoría ISO 23/8
+
+
+
+
+-Los ciclos de instrucciones cuando hay que interrumpirlos si o si los interrumpe una interrupción por clock, es como un aviso al Kernel (que el proceso no se apropie de la CPU)
+
+
+-Inhabilitar las interrupciones, aunque sea para el Kernel, es muy peligrso.

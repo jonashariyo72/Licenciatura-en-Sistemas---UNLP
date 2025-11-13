@@ -1,0 +1,139 @@
+programa Practica5Punto1;
+areas
+  ciudad: AreaC(1,1,100,100)
+robots
+  proceso juntarPapeles (ES papeles: numero)
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+        tomarPapel
+        papeles := papeles + 1
+  fin
+
+  proceso juntarFlores (ES flores: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+        tomarFlor
+        flores := flores + 1
+  fin
+
+  proceso ultimasTresCuadras (ES flores: numero; E av: numero)
+  comenzar
+    BloquearEsquina (av,98)
+    mover
+    juntarFlores (flores)
+    BloquearEsquina (av,99)
+    mover
+    LiberarEsquina (av,98)
+    juntarFlores (flores)
+    mover
+    LiberarEsquina (av,99)
+    juntarFlores (flores)
+  fin
+
+  proceso primerasTresCuadras (ES papeles: numero; E ca: numero)
+  comenzar
+    BloquearEsquina (2,ca)
+    mover
+    juntarPapeles (papeles)
+    BloquearEsquina (3,ca)
+    mover
+    LiberarEsquina (2,ca)
+    juntarPapeles (papeles)
+    mover
+    LiberarEsquina (3,ca)
+  fin
+  
+  
+  
+  robot florero
+  variables 
+    flores: numero
+    av: numero
+    ID: numero
+  comenzar
+    RecibirMensaje(ID, fiscal)
+    av := PosAv;
+    flores := 0
+    repetir 96
+        juntarFlores (flores)
+        mover
+    juntarFlores (flores)
+    ultimasTresCuadras (flores)
+    EnviarMensaje (ID, fiscal)
+    EnviarMensaje (flores,fiscal)
+  fin
+
+  robot papelero
+  variables
+    papeles: numero
+    ca: numero
+    ID: numero
+  comenzar
+    RecibirMensaje(ID, fiscal)
+    ca := PosCa
+    papeles := 0; 
+    juntarPapeles (papeles)
+    primerasTresCuadras (papeles,ca)
+    repetir 95
+        juntarPapeles (papeles)
+        mover
+    juntarPapeles (papeles)
+    EnviarMensaje (ID, fiscal)
+    EnviarMensaje (papeles,fiscal)
+  fin
+
+  robot fiscalizador
+  variables
+    id: numero
+    flores: numero
+    papeles: numero
+    cant: numero
+  comenzar
+    EnviarMensaje (1,florero1)
+    EnviarMensaje (2,florero2)
+    EnviarMensaje (3,papelero1)
+    EnviarMensaje (4,papelero2)
+
+    flores := 0
+    papeles := 0
+
+    repetir 4
+        RecibirMensaje (id,*)
+
+        si (id = 1)
+            RecibirMensaje (cant,florero1)
+            flores := flores + cant
+        sino
+            si (id = 2)
+                RecibirMensaje (cant,florero2)
+                flores := flores + cant
+            sino
+                si (id = 3)
+                    RecibirMensaje (cant, papelero1)
+                    papeles := papeles + cant
+                sino
+                    RecibirMensaje (cant,papelero2)
+                    papeles := papeles + cant
+
+    si (papeles > flores)
+        Informar (2)
+    sino
+        si (flores > papeles)
+            Informar (1)
+        sino
+            Informar (0)
+  fin
+  
+  
+
+
+variables
+  florero1: florero
+  florero2: florero
+  papelero1: papelero
+  papelero2: papelero
+  fiscal: fiscalizador
+comenzar
+  AsignarArea(Rinfo,ciudad)
+  Iniciar(Rinfo,1,1)
+fin

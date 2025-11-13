@@ -1,0 +1,23 @@
+/* 1. Listar las mascotas que recibieron la vacuna "Triple Felina" con costo menor a 
+$10.000 al momento de la aplicación */
+
+SELECT m.nombre
+FROM Mascota m 
+INNER JOIN Aplicación_Vacuna a ON (m.id_mascota = a.id_mascota)
+WHERE (nombreV) = "Triple Felina" AND (precio) < '10.000'
+
+
+/* 2. Listar los datos de las mascotas que no se atendieron durante el año actual */
+
+SELECT m.nombre, especie, raza, f_nac, dni_cliente
+FROM Mascota m 
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM Consulta c 
+    WHERE m.id_mascota = c.id_mascota AND (YEAR(fecha)) = '2025'
+)
+AND NOT EXISTS (
+    SELECT 1 
+    FROM Aplicación_Vacuna a 
+    WHERE m.id_mascota = a.id_mascota AND (YEAR(fecha)) = '2025'
+)

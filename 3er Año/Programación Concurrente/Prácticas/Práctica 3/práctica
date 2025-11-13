@@ -1,0 +1,853 @@
+1. Se dispone de un puente por el cual puede pasar un solo auto a la vez. Un auto pide permiso 
+para pasar por el puente, cruza por el mismo y luego sigue su camino
+
+
+a. ¿El código funciona correctamente? Justifique su respuesta.
+
+    Si. Porque verifica que no haya autos, de lo contrario, se duerme.
+
+b. ¿Se podría simplificar el programa? ¿Sin monitor? ¿Menos procedimientos? ¿Sin variable condition? En caso afirmativo, rescriba el código.
+    
+    Se puede quitar las condiciones, porque los monitores ya garantizan exclusión mutua. Así que simplemente escribo el paso por el puente, sin verificar.
+
+
+c. ¿La solución original respeta el orden de llegada de los vehículos? Si rescribió el código 
+en el punto b), ¿esa solución respeta el orden de llegada? 
+
+No, ninguno la respeta. Se debe usar Pass the Condition.
+
+
+
+
+2. Existen N procesos que deben leer información de una base de datos, la cual es administrada 
+por un motor que admite una cantidad limitada de consultas simultáneas.
+
+a) Analice el problema y defina qué procesos, recursos y monitores/sincronizaciones 
+serán necesarios/convenientes para resolverlo.
+
+b) Implemente el acceso a la base por parte de los procesos, sabiendo que el motor de 
+base de datos puede atender a lo sumo 5 consultas de lectura simultáneas. 
+
+Monitor Motor
+    cond entrar;
+    int cant = 0;
+
+    Procedure entrarBD()
+        while(cant>4) wait (entrar);
+        cant++; 
+    end;
+
+    Procedure salirBD()
+        cant--;
+        signal(entrar);
+    end;
+
+
+
+
+End Monitor
+
+
+Process Lector [id: 0..N-1]
+    Motor.entrarBD()
+    //usar BD;
+    Motor.salirBD();
+end;
+
+
+
+
+3. Existen N personas que deben fotocopiar un documento. La fotocopiadora sólo puede ser 
+usada por una persona a la vez. Analice el problema y defina qué procesos, recursos y 
+monitores serán necesarios/convenientes, además de las posibles sincronizaciones requeridas 
+para resolver el problema. Luego, resuelva considerando las siguientes situaciones:
+
+a) Implemente una solución suponiendo no importa el orden de uso. Existe una función 
+Fotocopiar() que simula el uso de la fotocopiadora.
+
+Monitor Fotocopiadora
+
+    Procedure usar()
+        Fotocopiar();
+    end;
+
+End Monitor
+
+
+Process Persona [id: 0..N-1]
+    Fotocopiadora.usar(id)
+end;
+
+
+b) Modifique la solución de (a) para el caso en que se deba respetar el orden de llegada.
+
+Monitor Fotocopiadora
+    cond cola;
+    int esperando = 0;
+    bool libre = true;
+
+    Procedure entrar()
+        if (not libre){
+            wait(cola);
+            esperando++;
+        }
+        else{ libre := false;}
+    end;
+
+    Procedure salir()
+        if(esperando = 0) libre := true;
+        else{
+            esperando --;
+            signal(cola);
+        }
+    end;
+
+End Monitor
+
+
+Process Persona [id: 0..N-1]
+    Fotocopiadora.entrar(id);
+    Fotocopiar();
+    Fotocopiadora.salir();
+end Persona;
+
+
+
+c) Modifique la solución de (b) para el caso en que se deba dar prioridad de acuerdo con la 
+edad de cada persona (cuando la fotocopiadora está libre la debe usar la persona de mayor 
+edad entre las que estén esperando para usarla).
+
+Monitor Fotocopiadora {
+    bool libre = true;
+    cond espera[n];
+    int id;
+    int esperando = 0;
+    cola c;
+
+    Procedure usar(idP, edad: in int){
+        if (!libre) {
+            agregar (c, idP, edad);
+            esperando++:
+            wait(espera[idP]);
+        }
+        else {
+            libre = false;
+        }
+    }
+
+    Procedure dejar(){
+        if (esperando > 0) {
+            sacar(c,id);
+            esperando--;
+            signal(cv[id]);
+        }
+        else {
+            libre = true;
+        }
+    }
+}
+
+
+Process Persona [id:0..N-1]{
+    Documento documento; 
+    Fotocopia fotocopia;
+
+    Fotocopiadora.usar(id);
+    Fotocopiar();
+    Fotocopiadora.dejar();
+}
+
+
+d) Modifique la solución de (a) para el caso en que se deba respetar estrictamente el orden 
+dado por el identificador del proceso (la persona X no puede usar la fotocopiadora hasta 
+que no haya terminado de usarla la persona X-1).
+
+Monitor Fotocopiadora
+    cond cola[N];
+    int orden = 0;
+
+    Procedure entrar(int id)
+        while (orden <> id) wait(cola[id]);
+    end;
+
+    Procedure salir()
+        orden++;
+        if (orden < N) signal(cola[orden]);
+    end;
+
+End Monitor
+
+
+Process Persona [i:0..N-1]{
+    Documento documento; 
+    Fotocopia fotocopia;
+
+    Fotocopiadora.entrar(i);
+    Fotocopiar();
+    Fotocopiadora.salir();
+}
+
+e) Modifique la solución de (b) para el caso en que además haya un Empleado que le indica a cada persona cuando debe usar la fotocopiadora.
+
+// preguntar
+
+
+f) Modificar la solución (e) para el caso en que sean 10 fotocopiadoras. El empleado le indica 
+a la persona cuál fotocopiadora usar y cuándo hacerlo.
+
+
+
+
+
+
+4. Existen N vehículos que deben pasar por un puente de acuerdo con el orden de llegada. Considere que el puente no soporta más de 50000kg y que cada vehículo cuenta con su propio 
+peso (ningún vehículo supera el peso soportado por el puente).
+
+Monitor Pasaje{
+    cond cola;
+    cond peso;
+    int peso_total = 0;
+    int esperando = 0;
+    bool libre := true;
+
+
+    Procedure entrar(int in p){
+        if (!libre){
+            esperando++;
+            wait(cola); 
+        }
+        else{
+            libre := false;
+        }
+
+        while (peso_total + p > 50000){
+            wait(peso);
+        }
+        peso_total += p;
+        if (esperando > 0){
+            esperando--;
+            signal(cola);
+        }
+        else {
+            libre = true;
+        }
+    }
+
+    Procedure dejar (p: in int){
+        peso_total -= p;
+        signal(peso);
+    }
+
+}
+
+
+Process Vehículo[id: 0..N-1]{
+    Pasaje.entrar(peso);
+    // cruza el puente;
+    Pasaje.dejar(peso);
+}
+
+// preguntar sobre variable LIBRE, si hay Busy Waiting.
+
+
+Monitor Pasaje{
+    cond peso;
+    int peso_total = 0;
+
+
+    Procedure entrar(int in p){
+        while (peso_total + p > 50000){
+            wait(peso);
+        }
+        peso_total += p;
+    }
+
+    Procedure dejar (p: in int){
+        peso_total -= p;
+        signal(peso);
+    }
+
+}
+
+
+Process Vehículo[id: 0..N-1]{
+    Pasaje.entrar(peso);
+    // cruza el puente;
+    Pasaje.dejar(peso);
+
+}
+
+
+// preguntar sobre esta solución
+
+
+5. En un corralón de materiales se deben atender a N clientes de acuerdo con el orden de llegada. Cuando un cliente es llamado para ser atendido, entrega una lista con los productos que 
+comprará, y espera a que alguno de los empleados le entregue el comprobante de la compra  realizada. 
+
+a) Resuelva considerando que el corralón tiene un único empleado. 
+
+b) Resuelva considerando que el corralón tiene E empleados (E > 1). Los empleados no 
+deben terminar su ejecución. 
+
+c) Modifique la solución (b) considerando que los empleados deben terminar su ejecución 
+cuando se hayan atendido todos los clientes. 
+
+a) 
+
+Monitor Entrega {
+    cond empleado, cliente, lista,comprobante, recibido;
+    int esperando = 0;
+    Lista lista;
+
+
+    Procedure atencion(Lista in: miLista){
+        esperando++;
+        signal (empleado);
+        wait(cliente);
+        Lista miLista;
+        lista := (miLista);
+        signal (lista);
+    }
+
+    Procedure atender (p: in int){
+        if (esperando == 0){
+            wait (empleado);
+        }
+        esperando--;
+        signal (cliente);
+        wait(lista);
+        Comprobante c;
+        entregarComprobante (c);
+        signal(comprobante);
+        wait (recibido);
+    }
+
+    Procedure esperarComprobante(){
+        wait(comprobante);
+        signal (recibido);
+    }
+
+}
+
+
+Process Cliente [id: 0..N-1]{
+    Entrega.atencion();
+    // entrego mi lista;
+    Entrega.esperarComprobante(peso);
+
+}
+
+Process Empleado {
+    Entrega.atender();
+
+}
+
+b)
+
+Monitor Entrega {
+    cond cola;
+    int esperando = 0;
+    int libres = 0;
+    cola empleadosLibres[E];
+
+
+    Procedure atencion(int in: idE){
+        if (libres = 0){
+            esperando++;
+            wait (esperaClientes);
+        }
+        else{
+            libres--;
+        }
+        pop (empleadosLibres,idE);
+    }
+
+    Procedure atender (int in: id){
+          push(empleadosLibres, idE);
+          if (esperando > 0 ) { 
+            esperando --;
+            signal (esperaClientes); 
+        }{
+            else libres++;
+        }
+    }
+
+}
+
+Monitor Escritorio[id: 0..E-1] {
+    cond entrega;
+    int esperando = 0;
+    Lista lista; Comprobante comprobante;
+    bool listo = false;
+
+
+    Procedure entrega(in Lista: miLista; out Comprobante: C ){
+        lista = miLista;
+        listo := true;
+        signal(entrega);
+        wait (comprobante);
+        C := comprobante;
+        signal (recibioComprobante);
+    }
+
+    Procedure esperoDatos (Lista in: l){
+        if(!listo) wait(entrega)
+        l := lista;
+    }
+
+    Procedure entregarComprobante (Comprobante in: C){
+        comprobante:= C;
+        signal (comprobante);
+        wait (recibioComprobante);
+        listo := false;
+
+    }
+
+}
+
+
+Process Cliente [id: 0..N-1]{
+    Entrega.atencion();
+    // entrego mi lista;
+    Entrega.esperarComprobante(peso);
+
+}
+
+Process Empleado [id:0..E-1]{
+    Entrega.atender();
+
+}
+
+c)
+    Monitor Entrega {
+    cond cola;
+    int esperando = 0;
+    int libres = 0;
+    cola empleadosLibres[E];
+    int cantClientes = 0;
+
+
+    Procedure atencion(int in: idE){
+        if (libres = 0){
+            esperando++;
+            wait (esperaClientes);
+        }
+        else{
+            libres--;
+        }
+        pop (empleadosLibres,idE);
+    }
+
+    Procedure atender (int in: id; bool out: seguir){
+        if (cantClientes == N){
+            seguir := false;
+        }
+        else{
+          push(empleadosLibres, idE);
+          seguir := true;
+          cantClientes++;
+          if (esperando > 0 ) { 
+            esperando --;
+            signal (esperaClientes); }
+            {
+                else libres++;
+            }
+        }
+    }
+
+}
+
+Monitor Escritorio[id: 0..E-1] {
+    cond entrega;
+    int esperando = 0;
+    Lista lista; Comprobante comprobante;
+    bool listo = false;
+
+
+    Procedure entrega(in Lista: miLista; out Comprobante: C ){
+        lista = miLista;
+        listo := true;
+        signal(entrega);
+        wait (espeeroComprobante);
+        C := comprobante;
+        signal (recibioComprobante);
+    }
+
+    Procedure esperoDatos (Lista out: l){
+        if(!listo) wait(entrega)
+        l := lista;
+    }
+
+    Procedure entregarComprobante (Comprobante in: C){
+        comprobante:= C;
+        signal (esperoComprobante);
+        wait (recibioComprobante);
+        listo := false;
+
+    }
+
+}
+
+
+Process Cliente [id: 0..N-1]{
+    Entrega.atencion();
+    // entrego mi lista;
+    Entrega.esperarComprobante(peso);
+
+}
+
+Process Empleado [id:0..E-1]{
+    while (seguir){
+        Entrega.atender(seguir);
+    }
+
+}
+
+
+
+6. Existe una comisión de 50 alumnos que deben realizar tareas de a pares, las cuales son corregidas por un JTP. Cuando los alumnos llegan, forman una fila.
+Una vez que están todos en fila, el JTP les asigna un número de grupo a cada uno. Para ello, suponga que existe una función AsignarNroGrupo() que retorna un número 
+“aleatorio” del 1 al 25.
+Cuando un alumno ha recibido su número de grupo, comienza a realizar su tarea. Al terminarla, el alumno le avisa 
+al JTP y espera por su nota. Cuando los dos alumnos del grupo completaron la tarea, el JTP 
+les asigna un puntaje (el primer grupo en terminar tendrá como nota 25, el segundo 24, y así 
+sucesivamente hasta el último que tendrá nota 1). Nota: el JTP no guarda el número de grupo 
+que le asigna a cada alumno. 
+
+
+Monitor JTP{
+    int fila = 0;
+    cond filaCompleta, esperarCompañero;
+    int notaGlobal = 25;
+    int terminaron [25] = {0}; int notas [25];
+
+    Procedure llegarALaFila (){
+        fila++;
+        if (fila < 50){
+            wait(filaCompleta);
+        }
+        else{
+            signal_all (filaCompleta);
+        }
+
+    }
+
+    Procedure recibirNro (int out: numGrupo){
+        numGrupo := AsignarNroGrupo();
+    }
+
+    Procedure entregarTarea(int in: numGrupo; int out: miNota){
+        terminaron[numGrupo]++;
+        if (terminaron[numGrupo < 2]){
+            wait (esperarCompañero);
+            miNota := notas[numGrupo];
+        }
+        else{
+            notas[numGrupo] := notaGlobal;
+            notaGlobal--; 
+            signal (esperarCompañero)
+            miNota := notas[numGrupo];
+        }
+    }
+
+
+}
+
+    Process Alumno[id: 0..49]{
+        int numGrupo, miNota;
+        JTP.llegarALaFila();
+        JTP.recibirNro(numGrupo);
+        //hacer tarea;
+        JTP.entregarTarea(numGrupo,miNota);
+    }
+
+
+7. Se debe simular una maratón con C corredores donde en la llegada hay UNA máquina 
+expendedoras de agua con capacidad para 20 botellas. Además, existe un repositor encargado 
+de reponer las botellas de la máquina. Cuando los C corredores han llegado al inicio comienza 
+la carrera. Cuando un corredor termina la carrera se dirigen a la máquina expendedora, espera 
+su turno (respetando el orden de llegada), saca una botella y se retira. Si encuentra la máquina 
+sin botellas, le avisa al repositor para que cargue nuevamente la máquina con 20 botellas; 
+espera a que se haga la recarga; saca una botella y se retira. Nota: mientras se reponen las 
+botellas se debe permitir que otros corredores se encolen.
+
+
+Monitor Corredores{
+    int inicio = 0;
+    int C;
+    int esperando = 0;
+    bool libre := true;
+    cond cola, esperarInicio;
+
+
+    Procedure llegarAlInicio(){
+        inicio++;
+        if (inicio < C){
+            wait (esperarInicio);
+        }
+        else{
+            signal_all (esperarInicio);
+        }
+    }
+
+    Procedure entrar (){
+        if (!libre){
+            esperando++;
+            wait(cola); 
+        }
+        else{
+            libre := false;
+        }
+    }
+
+    Procedure salir()
+        if(esperando = 0) libre := true;
+        else{
+            esperando --;
+            signal(cola);
+        }
+    end;
+
+}
+
+
+
+Monitor Maquina{
+    int botellas = 20;
+
+    Procedure tomarBotella(){
+        if (botellas = 0){
+            signal (aviso);
+            wait (reponer);
+            botellas --; // agarro una botella
+        }
+        else{
+            botellas --; // agarro una botella
+        }
+    } 
+
+    Procedure reponerBotellas (){
+        wait (aviso);
+        botellas := 20;
+        signal (reponer);
+    }
+
+
+}
+
+Process Corredor[id: 0..C-1]{
+
+    Corredores.llegarAlInicio();
+    //correr
+    Corredores.entrar();
+    Maquina.tomarBotella();
+    Corredores.dejar();
+}
+
+Process Repositor{
+    while (true){
+        Maquina.reponerBotellas();
+    }
+}
+
+
+8. En un entrenamiento de fútbol hay 20 jugadores que forman 4 equipos (cada jugador conoce 
+el equipo al cual pertenece llamando a la función DarEquipo()). Cuando un equipo está listo 
+(han llegado los 5 jugadores que lo componen), debe enfrentarse a otro equipo que también 
+esté listo (los dos primeros equipos en juntarse juegan en la cancha 1, y los otros dos equipos 
+juegan en la cancha 2). Una vez que el equipo conoce la cancha en la que juega, sus jugadores 
+se dirigen a ella. Cuando los 10 jugadores del partido llegaron a la cancha comienza el partido, 
+juegan durante 50 minutos, y al terminar todos los jugadores del partido se retiran (no es 
+necesario que se esperen para salir). 
+
+Monitor Equipo[id:0..3] {
+    int jugadores = 0;
+    int numCancha;
+    cond esperarEquipo;
+
+    Procedure asignarEquipo (int out: equipo){
+        equipo := DarEquipo();
+    }
+
+    Procedure llegarEquipo(int out: cancha){
+        jugadores++;
+        if (jugadores < 5){
+            wait (esperarEquipo)
+        }
+        else{
+            signal_all(esperarEquipo);
+            Administrador.darCancha(numCancha);
+        }
+        cancha := numCancha;
+    }
+
+}
+
+Monitor Administrador{
+    int cant = 0;
+
+    Procedure darCancha(int out: numCancha){
+        if (cant < 2){
+            numCancha := 1;
+        }
+        else{
+            numCancha := 2;
+        }
+        cant++;
+    }
+
+}
+
+Monitor Cancha [id:0..1]{
+    int totalJugadores = 0;
+    cond espera, inicio;
+
+    Procedure llegarACancha(){
+        totalJugadores++;
+        if (totalJugadores = 10) signal (inicio);
+        wait (espera);
+    }
+
+    Procedure empezarPartido(){
+        if (cant < 22) wait (inicio);
+    }
+
+    Procedure terminarPartido(){
+        signal_all(espera);
+    }
+
+}
+
+
+Process Jugador [id:0..19]{
+    int equipo,numCancha;
+
+    Equipo.asignarEquipo(equipo);
+    Equipo.llegarACancha(numCancha)
+    Cancha.llegarACancha();
+}
+
+Process Partido [id:0..1]{
+    Cancha[id].empezarPartido();
+    delay(50 minutos);
+    Cancha[id].terminarPartido();
+}
+
+
+9. En un examen de la secundaria hay un preceptor y una profesora que deben tomar un examen 
+escrito a 45 alumnos. El preceptor se encarga de darle el enunciado del examen a los alumnos 
+cundo los 45 han llegado (es el mismo enunciado para todos). La profesora se encarga de ir 
+corrigiendo los exámenes de acuerdo con el orden en que los alumnos van entregando. Cada 
+alumno al llegar espera a que le den el enunciado, resuelve el examen, y al terminar lo deja 
+para que la profesora lo corrija y le envíe la nota. Nota: maximizar la concurrencia; todos los 
+procesos deben terminar su ejecución; suponga que la profesora tiene una función 
+corregirExamen que recibe un examen y devuelve un entero con la nota.  
+
+Monitor Examen{
+    cond esperar, prece 
+    Enunciado enunciado;
+
+    Procedure llegadaAlExamen(Enunciado out: examen){
+        alumno++;
+        if (alumno < 45){
+            wait (esperar);
+        }
+        else{
+            signal (prece);
+            wait (esperar);
+        }
+        examen := enunciado;
+    }
+
+
+    Procedure darEnunciado(Examen in: E){
+        if (alumno < 45) wait (prece);
+        signal_all(espera);
+        enunciado := E;
+    }
+
+
+
+}
+
+Monitor Correción{
+    cond profesora,
+    cola alumnos [45];
+    int notas [45];,
+    
+
+    Procedure entregarExamen (int in: id; text in: examen; int out: miNota){
+        alumnos.push[id,examen];
+        signal (profesora);
+        wait (esperarNota);
+        miNota := notas[id];
+    }
+
+    Procedure corregirExamen(){
+        text e; int a;
+        if (alumnos.size() = 0) wait (profesora);
+        a = alumnos.pop(); e = alumnos.pop();
+        notas[a] = corregirExamen(e);
+        signal(esperarNota);
+    }
+
+}
+
+
+
+10. En un parque hay un juego para ser usada por N personas de a una a la vez y de acuerdo al 
+orden en que llegan para solicitar su uso. Además, hay un empleado encargado de desinfectar el 
+juego durante 10 minutos antes de que una persona lo use. Cada persona al llegar espera hasta 
+que el empleado le avisa que puede usar el juego, lo usa por un tiempo y luego lo devuelve. 
+Nota: suponga que la persona tiene una función Usar_juego que simula el uso del juego; y el 
+empleado una función Desinfectar_Juego que simula su trabajo. Todos los procesos deben 
+terminar su ejecución.
+
+Monitor Juego {
+    bool libre := false;
+    cond esperar,usar;
+    int esperando = 0;
+
+    Procedure dejarEntrar (){
+        if (esperando > 0){
+            esperando--;
+            signal(esperar);
+        }
+        else{
+            libre := true;
+        }
+        wait (usar);
+        }
+
+     Procedure encolarme (){
+        if (!libre){
+            esperando++;
+            wait(esperar);
+        }
+        else{
+            libre := false;
+        }
+        }
+
+
+        Procedure terminar (){}
+        signal(usar);
+        }
+
+
+
+    Process Persona[id: 0..N-1]{
+        Juego.encolarme();
+        Usar_juego();
+        Juego.avisar();
+    }
+
+    Process Empleado{
+        for (i= 0..N-1){
+            Desinfectar_Juego();
+            Juego.dejarEntrar();
+        }
+
+    }
+
+

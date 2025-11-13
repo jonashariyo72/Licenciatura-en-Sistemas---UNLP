@@ -1,0 +1,71 @@
+Oficina de Trámites:
+
+chan solicitarAtención (int);
+
+
+Process Persona [id: 1..P]{
+    text tramite; int idE;
+    send solicitarAtención (id);
+    receive Atencion [id] (idE);
+    send Datos[idE] (tramite);
+    receive Resultado [id] (tramite);
+
+}
+
+Process Empleado [id: 1..3]{
+    text t; int idP;
+    while (true){
+        send pedidoTrabajo (id);
+        receive Siguiente [id](idP);
+        if (idP <> -1){
+            send Atencion [idP] (id);
+            receive Datos [id] (t);
+            realizarTramite (t);
+            send Resultado [idP] (t);
+        }
+        else{
+            delay 300;
+        }
+    }
+}
+
+Process Admin {
+    int idE, idP;
+    while (true){
+        receive pedidoTrabajo (idE);
+        if (not empty (solicitarAtención)){
+            receive solicitarAtención (idP);
+        }
+        else{
+            idP := -1;
+        }
+        send Siguiente [idE] (idP);
+    }
+}
+
+Presupuesto en negocio:
+
+chan solicitarAtención (int);
+chan Atencion[P] (int);
+chan enviarListado [5] (text);
+chan Resultado [P] (text);
+
+Process Persona [id: 1..N]{
+    text listado,Presupuesto; int idE;
+    send solicitarAtención (id);
+    receive Atencion [id] (idE);
+    send enviarListado[idE] (listado);
+    receive Resultado [id] (Presupuesto);
+}
+
+Process Empleado [id: 1..5]{
+    text listado,p; int idP;
+    while (true){
+        receive solicitarAtención (idP);
+        send Atencion[idP](id);
+        receive enviarListado [id](listado);
+        hacerPresupuesto (p);
+        send Resultado[idP](p);
+    }
+}
+

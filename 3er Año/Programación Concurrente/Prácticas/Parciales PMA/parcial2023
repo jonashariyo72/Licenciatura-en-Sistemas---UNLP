@@ -1,0 +1,79 @@
+En una oficina existen 100 empleados que envían documentos para imprimir en 5 impresoras compartidas. Los
+pedidos de impresión son procesados por orden de llegada y se asignan a la primera impresora que se encuentre
+libre. Implemente un programa que permita resolver el problema anterior usando PASAJE DE MENSAJES
+ASINCRÓNICO (PMA)
+
+chan Pedido (texto);
+chan Trabajo (int);
+chan Siguiente[5](int);
+
+Process Empleado [id: 0..99]{
+    texto Doc;
+    while (true){
+        Doc := generarDocumento();
+        send Pedido (Doc);
+    }
+}
+
+
+Process Impresora [id: 0..4]{
+    texto Doc;
+    while(true){
+        send Trabajo (id);
+        receive Siguiente[id](Doc);
+        if (Doc <> "Vacío") Imprimir(Doc);
+        else write "El Documento está vacío"
+    }
+}
+
+Process Admin {
+    int idI; texto d;
+    while(true){
+        receive Trabajo (idI);
+        if (empty (Pedido)) d := "Vacío"
+        else receive Pedido (d);
+
+        send Siguiente[idI](d);
+    }
+}
+
+
+
+Parcial 2022.
+
+chan Pedido (Documento,int);
+chan Respuesta [] (Producto);
+chan Trabajo (int);
+chan Siguiente [] (Documento);
+
+Process Cliente [id: 0..C-1]{
+    Doc p; Producto repuesto;
+    send Pedido (p,id);
+    receive Respuesta[id](repuesto);
+}
+
+
+
+Process Vendedor [id: 0..V-1]{
+    pedido Doc; int idC; Producto repuesto;
+    while(true){
+        send Trabajo (id);
+        if (!empty (Siguiente[id])){
+            receive Siguiente[id](Doc,idC);
+            realizarPedido(Doc,repuesto);
+            send Respuesta[idC] (repuesto);
+        }
+        else DELAY 180
+    }
+}
+
+Process Admin {
+    int idV,idC; cola pedidos;
+    while (true){
+        receive Trabajo (idV);
+        if (!empty(Pedido)) {
+            receive Pedido (p,idC);
+            send Siguiente[idV] (p,idC);
+        }
+    }
+}

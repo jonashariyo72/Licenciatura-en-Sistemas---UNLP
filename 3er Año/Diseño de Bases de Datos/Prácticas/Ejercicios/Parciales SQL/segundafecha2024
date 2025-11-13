@@ -1,0 +1,43 @@
+/* 1. Listar matricula, dni, nombre, apellido, telefono y email de los médicos con apellido Garcia */
+
+SELECT matricula, p.dni, apellido, nombre, telefono, email
+FROM Personas p
+INNER JOIN Medicos m (p.dni = m.dni)
+WHERE (p.apellido) = 'Garcia'
+
+
+/* 2. Listar dni, nombre, apellido de pacientes que no recibieron atenciones en 2024 */
+
+SELECT dni, nombre, apellido
+FROM Personas p
+EXCEPT 
+SELECT dni, nombre, apellido
+FROM Personas p
+INNER JOIN Atenciones a ON (p.dni = a.dni)
+WHERE (YEAR(fecha)) = '2024'
+
+/* 3. Listar nombre, apellido, dni, telefono y direccion de clientes que realizaron compras solamente durante el año 2022 */
+
+SELECT dni, nombre, apellido
+FROM Personas p
+INNER JOIN Atenciones a ON (p.dni = a.dni)
+WHERE (YEAR(fecha)) = '2024'
+
+
+/* 4. Listar para cada especialidad nombre y cantidad de medicos que se especializan en ella.  */
+
+SELECT nombreE, SUM (COUNT MedicosEspecialidades) as cantMedicos
+FROM Medicos m
+LEFT JOIN MedicosEspecialidades me ON (m.matricula = me.matricula)
+LEFT JOIN Especialidades e ON (me.idEspecialidad = e.idEspecialidad)
+GROUP BY e.idEspecialidad, e.nombreE
+
+/* 5. Listar matricula, dni, nombre y apellido del medico con más atenciones relizadas */
+
+
+SELECT matricula, p.dni, nombre, apellido
+FROM Medicos m
+INNER JOIN Personas P ON (m.dni = p.dni)
+INNER JOIN Atenciones a ON (m.matricula = a.matricula)
+GROUP BY m.matricula, p.dni, nombre, apellido
+HAVING COUNT (SUM a.matricula) = MAX

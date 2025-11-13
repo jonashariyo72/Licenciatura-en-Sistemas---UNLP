@@ -1,0 +1,135 @@
+programa finalConcurrente1
+areas
+  cuadradoA: AreaPC(11,11,15,15)
+  cuadradoB: AreaPC(21,11,25,15)
+  fuente: AreaPC (18,13,18,13)
+
+  proceso primeraEtapaFlorero 
+  variables
+    caR: numero
+    avR: numero
+  comenzar
+    avR := PosAv
+    caR := PosCa
+    repetir 5
+        BloquearEsquina (18,13)
+        Pos (18,13)
+        tomarFlor
+        Random (av,11,15)
+        Random (ca,11,15)
+        Pos (ave,ca)
+        LiberarEsquina (18,13)
+        depositarFlor
+        Pos (avR,caR)
+  fin
+
+  proceso primeraEtapaPapelero
+  variables
+    caR: numero
+    avR: numero
+    ca: numero
+    av: numero
+  comenzar
+    avR := PosAv
+    caR := PosCa
+    repetir 5
+        BloquearEsquina (18,13)
+        Pos (18,13)
+        tomarPapel
+        Random (av,21,25)
+        Random (ca,11,15)
+        Pos (ave,ca)
+        LiberarEsquina (18,13)
+        depositarPapel
+        Pos (avR,caR)
+  fin
+
+  proceso segundaEtapaFlorero 
+  variables
+    go: boolean
+    av: numero
+    ca: numero
+    avR: numero
+    caR: numero
+    ok: boolean
+  comenzar
+    avR := PosAv
+    caR := PosCa
+    RecibirMensaje (go,fiscal)
+    mientras (ok = T)
+        Random (av,21,25)
+        Random (ca,11,15)
+        Pos (av,ca)
+        si (HayFlorEnLaEsquina)
+            tomarFlor
+            ok = V 
+    BloquearEsquina (18,13)
+    Pos (18,13)
+    depositarFlor
+    EnviarMensaje (1,fiscal)
+    Pos (avR,caR)
+    LiberarEsquina (18,13,18,13)
+  fin
+
+  proceso segundaEtapaPapelero 
+  variables
+    go: boolean
+    av: numero
+    ca: numero
+    avR: numero
+    caR: numero
+    ok: boolean
+  comenzar
+    avR := PosAv
+    caR := PosCa
+    RecibirMensaje (go,fiscal)
+    mientras (ok = T)
+        Random (av,11,15)
+        Random (ca,11,15)
+        Pos (av,ca)
+        si (HayPapelEnLaEsquina)
+            tomarPapel
+            ok = V 
+    BloquearEsquina (18,13)
+    Pos (18,13)
+    depositarPapel
+    EnviarMensaje (1,fiscal)
+    //RecibirMensaje(ok,fiscal)
+    Pos (avR,caR)
+    LiberarEsquina (18,13)
+  fin
+  
+  
+robots
+  robot florero
+  comenzar
+    primeraEtapaFlorero
+    segundaEtapaFlorero
+  fin
+
+  robot papelero 
+  comenzar
+    primeraEtapaPapelero
+    segundaEtapaPapelero
+  fin
+
+  robot fiscal
+  variables
+    win
+  comenzar
+    repetir 2
+      //RecibirMensaje * 
+    EnviarMensaje (V,florero)
+    EnviarMensaje (V,papelero)
+
+    RecibirMensaje (win,*)
+
+ 0000000000.0.0
+     RecibirMensaje (perdedor,*)
+  fin
+variables
+  Rinfo: robot1
+comenzar
+  AsignarArea(Rinfo,ciudad)
+  Iniciar(Rinfo,1,1)
+fin

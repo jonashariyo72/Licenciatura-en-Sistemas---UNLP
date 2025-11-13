@@ -1,0 +1,127 @@
+Procedure Banco is
+
+Task Coordinador is
+    entry atencionJubilado (p: IN texto);
+    entry atencionNormal (p: IN texto);
+end Caja
+
+
+Task Type Persona is
+    arrPersona: array (1..P) of Persona;
+End Persona
+
+Task body Caja is
+    pago: texto; 
+Begin
+    loop
+        SELECT
+            accept atencionJubilado (p: IN texto) do
+                pago := p;
+            end atencionJubilado
+        OR
+            when (atencionJubilado'COUNT = 0) accept atencionNormal (p: IN texto) do
+                pago := p;
+            end atencionNormal
+        END SELECT  
+    end loop
+End Caja
+
+Task body Persona is
+    pago: texto;
+Begin
+    if (soyJubilado()) then
+        SELECT
+            Caja.atencionJubilado(pago);
+        OR
+            DELAY 900
+                realizarNota(nota);
+                Responsable.dejarNota(nota)
+        END SELECT
+    else
+        SELECT
+            Caja.atencionNormal(pago);
+        OR
+            DELAY 900
+                realizarNota(nota);
+                Responsable.dejarNota(nota)
+        END SELECT
+    end if  
+End Persona
+
+Task body Responsable is
+    nota: texto; notas: cola;
+Begin
+    loop
+        accept dejarNota (nota: IN texto) do
+            notas.push(nota);
+        end dejarNota
+    end loop
+end Responsable
+
+end Banco 
+
+
+Procedure Puente is
+
+Task Caja is
+    entry atencionJubilado (p: IN texto);
+    entry atencionNormal (p: IN texto);
+end Caja
+
+Task Responsable is
+    entry dejarNota (nota: IN texto);
+end Responsable
+
+Task Type Persona is
+    arrPersona: array (1..P) of Persona;
+End Persona
+
+Task body Caja is
+    pago: texto; 
+Begin
+    loop
+        SELECT
+            accept atencionJubilado (p: IN texto) do
+                pago := p;
+            end atencionJubilado
+        OR
+            when (atencionJubilado'COUNT = 0) accept atencionNormal (p: IN texto) do
+                pago := p;
+            end atencionNormal
+        END SELECT  
+    end loop
+End Caja
+
+Task body Persona is
+    pago: texto;
+Begin
+    if (soyJubilado()) then
+        SELECT
+            Caja.atencionJubilado(pago);
+        OR
+            DELAY 900
+                realizarNota(nota);
+                Responsable.dejarNota(nota)
+        END SELECT
+    else
+        SELECT
+            Caja.atencionNormal(pago);
+        OR
+            DELAY 900
+                realizarNota(nota);
+                Responsable.dejarNota(nota)
+        END SELECT
+    end if  
+End Persona
+
+Task body Responsable is
+    nota: texto; notas: cola;
+Begin
+    loop
+        accept dejarNota (nota: IN texto) do
+            notas.push(nota);
+        end dejarNota
+    end loop
+end Responsable
+
+end Puente 

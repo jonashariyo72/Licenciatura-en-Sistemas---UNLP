@@ -1,0 +1,9 @@
+Final Septiembre 2022(Nicolas Del Rio):
+
+Procesos apropiativos, q se necesita para administrar este tipo de procesos, apoyo del hardware y estructura de datos 
+
+Paginacion y la diferencia con paginacion por demanda. Diferencia entre estos 2 y como utilizar memoria virtual con paginacion 
+Un algoritmo de reemplazo de página y explicarlo 
+
+Buffer cache que es y de una manera media implícita te preguntaba cómo lo aplicaba system v.
+

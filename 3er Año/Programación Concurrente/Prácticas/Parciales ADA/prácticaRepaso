@@ -1,0 +1,117 @@
+2) Resolver el siguiente problema. En un negocio de cobros digitales hay P personas que deben pasar 
+por la única caja de cobros para realizar el pago de sus boletas. Las personas son atendidas de acuerdo 
+con el orden de llegada, teniendo prioridad aquellos que deben pagar menos de 5 boletas de los que 
+pagan más. Adicionalmente, las personas ancianas tienen prioridad sobre los dos casos anteriores. 
+Las personas entregan sus boletas al cajero y el dinero de pago; el cajero les devuelve el vuelto y los 
+recibos de pago. 
+
+Procedure Cobros is
+
+Task Cajero is
+    entry atencionA (boleta: IN texto; dinero: IN Dinero; recibo: OUT texto);
+    entry atencionB (boleta: IN texto; dinero: IN Dinero; recibo: OUT texto);
+    entry atencionN (boleta: IN texto; dinero: IN Dinero; recibo: OUT texto);
+end Cajero;
+
+Task Type Persona is
+    arrPersonas: array (1..P) of Persona;
+End Persona;
+
+Task body Cajero is
+    dinero: Dinero; boleta: texto; recibo: texto; 
+Begin
+        for i := 1..P loop
+            SELECT 
+                accept atencionA (boleta: IN texto; dinero: IN Dinero; recibo: OUT texto) do
+                    recibo := devolverRecibo (boleta,dinero);
+                END atencionA;
+            OR
+                when (atencionA'COUNT=0) accept atencionB (boleta: IN texto; dinero: IN Dinero; recibo: OUT texto) do
+                    recibo := devolverRecibo (boleta,dinero);
+                END atencionB
+            OR
+                when (atencionA'COUNT=0 AND atencionB'COUNT=0) accept atencionN (boleta: IN texto; dinero: IN Dinero; recibo: OUT texto) do
+                    recibo := devolverRecibo (boleta,dinero);
+                END atencionN
+            END SELECT
+        end loop
+End Cajero
+
+Task body Persona is
+    dinero: Dinero; boleta: texto; recibo: texto;
+    cantBoletas: integer;
+Begin
+    if (soyAnciano ()) do Cajero.atencionA (boleta,dinero,recibo);
+    else if (cantBoletas < 5) do Cajero.atencionB (boleta,dinero,recibo);
+    else Cajero.atencionN (boleta,dinero,recibo)
+End Persona
+
+Begin
+    null;
+end Cobros
+
+
+
+3) Resolver el siguiente problema. La oficina central de una empresa de venta de indumentaria debe 
+calcular cuántas veces fue vendido cada uno de los artículos de su catálogo. La empresa se compone 
+de 100 sucursales y cada una de ellas maneja su propia base de datos de ventas. La oficina central 
+cuenta con una herramienta que funciona de la siguiente manera: ante la consulta realizada para un 
+artículo determinado, la herramienta envía el identificador del artículo a las sucursales, para que cada 
+una calcule cuántas veces fue vendido en ella. Al final del procesamiento, la herramienta debe 
+conocer cuántas veces fue vendido en total, considerando todas las sucursales. Cuando ha terminado 
+de procesar un artículo comienza con el siguiente (suponga que la herramienta tiene una función 
+generarArtículo() que retorna el siguiente ID a consultar). Nota: maximizar la concurrencia. Existe 
+una función ObtenerVentas(ID) que retorna la cantidad de veces que fue vendido el artículo con 
+identificador ID en la base de la sucursal que la llama.
+
+
+Procedure Cobros is
+
+Task Oficina is
+    entry pedirArticulo (idArticulo: OUT integer);
+    entry devolverCantidad (res: OUT integer);
+    entry terminar (boleta: IN texto; dinero: IN Dinero; recibo: OUT texto);
+end Oficina;
+
+Task Type Sucursal is
+    arrPersonas: array (1..100) of Sucursal;
+End Sucursal;
+
+Task body Oficina is
+    idA: integer; boleta: texto; recibo: texto; 
+Begin
+        loop
+            generarArtículo(idA);
+            total := 0;
+            for i := 1..200 do
+                SELECT
+                    accept pedirArticulo (idArticulo: OUT integer) do 
+                        idArticulo := idA;
+                    end pedirArticulo
+                OR 
+                    accept devolverCantidad (res: OUT integer) do
+                        total += res;
+                    end devolverCantidad
+            end for
+            print ("El total es: " total);
+            for i := 1..8 do
+                accept terminar();
+            end for
+    end loop
+End Oficina
+
+Task body Sucursal is
+    bD: baseDatos;
+    cant: integer;
+Begin
+    loop
+        Oficina.pedirArticulo(idA);
+        cant := ObtenerVentas (idA);
+        Oficina.devolverCantidad(cant);
+        Oficina.terminar();
+    end loop
+End Sucursal
+
+Begin
+    null;
+end Cobros

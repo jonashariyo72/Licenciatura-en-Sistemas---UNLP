@@ -1,0 +1,35 @@
+1)  Historia 1: P1 , P2 , P3 = 56
+    Historia 2: P3 hasta (x*3), P1, P3 (X*2) + 1 = 21, P2 = 22
+    Historia 3: P3 hasta (x * 3) = 0, P1 = 10, P2 = 11, P3 (11 *2) + 1 = 23
+
+2) Precondiciones:
+    - Asumo que M = 40.
+    - Cuento con 4 procesadores contadores
+
+    
+
+    int M = 40;
+    int N = 7;
+    int total = 0;
+    int procesos = 4;
+
+
+    Process Verificar [id: 0..3]
+    {
+        int comienzo = id * (M/procesos)
+        int final = comienzo + (M/procesos)
+
+        while (true)
+        {
+           for i = comienzo..final {
+                if (A[i] == N) <total++>
+           }
+
+
+        }
+
+
+    }
+
+
+

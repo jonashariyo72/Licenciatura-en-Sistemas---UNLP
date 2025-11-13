@@ -1,0 +1,87 @@
+programa Práctica5Punto4
+procesos
+  proceso juntarFlores (ES flores: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+        tomarFlor
+        flores := flores + 1
+  fin
+
+  proceso dejarFlores (E avR: numero; E caR: numero)
+  comenzar
+    BloquearEsquina (10,10)
+    Pos (10,10)
+    mientras (HayFlorEnLaBolsa)
+        depositarFlor
+    Pos (avR,caR)
+    LiberarEsquina (10,10)
+  fin
+  
+    
+areas
+  cuadrante: AreaPC(40,40,60,60)
+  esquina: AreaPC (10,10,10,10)
+  areaF: AreaP (4,1,4,1)
+robots
+  robot fiscalizador
+  variables
+    av: numero
+    ca: numero
+    r: numero
+    cant: numero
+    c: numero
+  comenzar
+    repetir 8
+        Random (r,1,3)
+        Random (av,40,60)
+        Random (ca,40,60)
+
+        EnviarMensaje (av,r)
+        EnviarMensaje (ca,r)
+
+    EnviarMensaje (0,florero1)
+    EnviarMensaje (0,florero2)
+    EnviarMensaje (0,florero3)
+
+    cant := 0
+    repetir 3
+        RecibirMensaje (c,*)
+        cant := cant + c
+    Informar (cant)
+  fin
+
+  robot florero
+  variables
+    ok: boolean
+    flores: numero
+    av: numero
+    ca: numero
+    avR: numero
+    caR: numero
+  comenzar
+    flores := 0
+    ok := F
+    avR := PosAv
+    caR := PosCa
+    mientras (ok = F)
+        RecibirMensaje (av,fiscal)
+        si (av = 0)
+            ok := V 
+        sino
+            RecibirMensaje (ca,fiscal)
+            BloquearEsquina (av,ca)
+            Pos (av,ca)
+            juntarFlores (flores)
+            Pos (avR,caR)
+            LiberarEsquina (av,ca)
+    si (HayFlorEnLaEsquina)
+        dejarFlores (avR,caR)
+    EnviarMensaje (flores,fiscal)
+  fin
+  
+variables
+  Rinfo: robot1
+comenzar
+  AsignarArea(Rinfo,ciudad)
+  Iniciar(Rinfo,1,1)
+fin

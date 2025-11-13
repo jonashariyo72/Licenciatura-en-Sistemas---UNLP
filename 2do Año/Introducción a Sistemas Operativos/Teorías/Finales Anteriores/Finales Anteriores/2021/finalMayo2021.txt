@@ -1,0 +1,12 @@
+Hola! Yo rendí en la mesa de este mes(Mayo 2021), te cuento lo que me tomaron:
+
+- Definición y objetivos de SO. Qué servicios brinda.
+
+- Procesos: .Definición y sus estructuras. Estados del proceso (new,ready,etc), cómo pasa de uno a otro y quienes están involucrados (long y short 
+            term scheduler, loader, dispatcher)
+
+           .Después me dió un ejemplo de round robin y me preguntó qué pasaba cuando se terminaba el quantum.
+
+- Memoria: Paginación, ventajas con respecto a particionamiento. Paginación por demanda. Thrashing/hiperpaginación. PFF.
+
+- E/S: Objetivos del SO para el manejo de e/s (algo así)

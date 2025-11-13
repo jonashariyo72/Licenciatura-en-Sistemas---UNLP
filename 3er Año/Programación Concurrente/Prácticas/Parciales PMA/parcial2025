@@ -1,0 +1,33 @@
+chan Llegada ();
+chan Empezar ();
+chan termineExamen (texto,int);
+chan Notas [] (int);
+
+
+Process Estudiante [id: 0..E-1]{
+    texto examen, mino;
+    send Llegada ();
+    receive Empezar();
+    hacerExamen (examen)
+    send termineExamen (examen,id)
+    receive Notas [id] (miNota);
+}
+
+
+Process Profesor {
+    int i, idA, nota; texto examen,;
+    for (i: 1..E){
+        receive Llegada (); // espera a que todos avisen que llegaron
+    }
+
+    for (i: 1..E){
+        send Empezar();
+    }
+
+    for (i: 1..E){
+        receive termineExamen(examen, idA);
+        corregirExamen (examen,nota);
+        send Notas [idA] (nota);
+    }
+
+}

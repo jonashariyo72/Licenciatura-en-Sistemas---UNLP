@@ -1,0 +1,76 @@
+Estacion de Servicio:
+
+Process Empleado{
+    int idC; text tipoCombustible; int cantCarga;
+    bool seguir := true;
+    while (seguir){
+        Admin!Trabajo();
+        Admin?Siguiente(idC,tipoCombustible,cantCarga);
+        if (idC <> -1){
+            //cargar combustible
+            Cliente[idC]!terminaCarga();
+        }
+        else{
+            seguir := false;
+        }
+    }
+}
+
+Process Cliente [id: 1..N]{
+    int idC; text tipoCombustible; int cantCarga;
+    Admin!Atencion(idC);
+    Empleado?terminaCarga();
+}
+
+Process Admin {
+    cola llegada; int idC,i; text tipoCombustible; int cantCarga;
+    seguir := true;
+
+    while (seguir){
+        if Cliente[*]?Atencion(idC,tipo,cant) ---> llegada.push(idC,tipo,cant);
+
+        [] not empty (llegada); Empleado?Trabajo() --> cant++;
+                                                        if (cant = N){
+                                                            idC := -1;
+                                                        }
+                                                        else{
+                                                            idC := llegada.pop();
+                                                            tipoCombustible := llegada.pop();
+                                                            cantCarga := llegada.pop();
+                                                        }
+                                                    
+                                                        Empleado!Siguiente(idC,tipoCombustible,cantCarga);
+
+        fi
+    }
+}
+
+
+Simulador de vuelo:
+
+Process Persona [id: 1..N]{
+    Admin!llegue(id);
+    Admin?empezar();
+    //usar simulador
+    Admin!listo();
+}
+
+Process Admin{
+    int idP,sig; bool libre := true; cola llegada;
+    do Persona[*].llegue? --> 
+            if (libre){
+                libre := false;
+                Persona[idP]!empezar();
+            }
+            else{
+                llegada.push(idP);
+            }
+    [] Persona[*]?listo --> 
+            if (not empty llegada){
+                sig := llegada.pop();
+                Persona[sig]!.empezar;
+            }
+            else{
+                libre := true;
+            }
+}

@@ -1,0 +1,80 @@
+3. MONITORES
+
+
+Monitor Descarga [id: 0..1]{
+
+    cond espera [0..29];
+    cola camiones;
+    cond aviso,;
+
+
+    Procedure llegar (int in: idCamion; ){
+        camiones.push(id);
+        signal (aviso);
+        wait (espera[id]);
+    }
+
+    Procedure salir (){
+        signal (descarga);
+    }
+
+    Procedure recibirCamion (){
+        int aux;
+        if (camiones.isEmpty()){
+            wait (aviso);
+        }
+        aux := camiones.pop();
+        signal (espera[id]);
+        wait (descarga);
+    }
+}
+
+
+Process Camión[id: 0..29]{
+    int numTipo = asignarTipo();
+    Descarga[numTipo].llegar(id);
+    descargar();
+    Descarga[numTipo].salir(id);
+}
+
+Process Empleado [id: 0..1]{
+    for i := 1..15{
+        Descarga[id].recibirCamion();
+    }
+}
+
+
+2. SEMÁFOROS
+
+    int B;
+    bool libre := true;
+    cola barcos;
+    sem mutex = 1;
+    sem espera [0..B-1];
+
+
+    Process Barco [id: 0..B-1]{
+        P(mutex);
+        if(libre){
+            libre := false;
+            V(mutex);
+        }
+        else{
+            barcos.push(id);
+            V(mutex);
+            P(espera[id]);
+        }
+
+        descargarContenido();
+
+        P(mutex);
+        if(barcos.isEmpty()){
+            libre := true;
+        }
+        else{
+            int aux;
+            aux := barcos.pop()
+            V(espera[aux]);
+        }
+        V(mutex);
+    }

@@ -1,0 +1,66 @@
+En una oficina existen 100 empleados que envían documentos para imprimir en 5 impresoras compartidas. Los
+pedidos de impresión son procesados por orden de llegada y se asignan a la primera impresora que se encuentre
+libre. Implemente un programa que permita resolver el problema anterior usando PASAJE DE MENSAJES
+SINCRÓNICO (PMS)
+
+
+Process Empleado [id: 0..99]{
+    texto Doc;
+    while (true){
+        Doc := generarDocumento();
+        Admin!Pedido (idE,Doc);
+        Impresora[*]?Resp(Doc);
+    }
+}
+
+
+Process Impresora [id: 0..4]{
+    texto Doc;
+    while(true){
+        Admin!Trabajo(id);
+        Admin?Siguiente(idE,Doc);
+        if (Doc <> "Vacío") Imprimir(Doc);
+        else write "El Documento está vacío"
+        Empleado[idE]!Resp(Doc);
+    }
+}
+
+Process Admin {
+    int idI; texto d; cola docs;
+    do Empleado[*]?Pedido(id,Doc) ---> docs.push(id,Doc);
+        not empty (docs); Impresora[*]?Trabajo(idI) ---> Impresora[idI].Siguiente(docs.pop(),docs.pop())
+    od
+}
+
+
+
+
+Parcial 2022) 
+
+Process Estudiante [id: 0..E-1]{
+    Admin!Paso(id);
+    Admin?Habilitación();
+    // usar horno
+    Admin!Retiro();
+}
+
+
+Process Admin{
+    int idE,sig; bool libre := true; cola llegada;
+    do Estudiante[*]?Paso(idE) --> 
+            if (libre){
+                libre := false;
+                Estudiante[idE]!Habilitación();
+            }
+            else{
+                llegada.push(idE);
+            }
+    [] Estudiante[*]?Retiro --> 
+            if (not empty llegada){
+                sig := llegada.pop()
+                Espectador[sig]!.Habilitación;
+            }
+            else{
+                libre := true;
+            }
+}

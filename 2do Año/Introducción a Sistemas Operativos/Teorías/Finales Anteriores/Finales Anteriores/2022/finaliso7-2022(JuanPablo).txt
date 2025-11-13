@@ -1,0 +1,33 @@
+final iso 7/7/2022
+
+1_Procesos
+
+  1a_ Defina todo lo necesario para realizar las transiciones vistas en la teoria (new, ready running waiting)
+
+  1_b Responda y justifique en que se apoya el so para:
+
+     1b1 Que un proceso no se apropie de la cpu
+
+     1b2 Que un proceso no acceda a direcciones de memoria de otro
+
+     1b3 Que un proceso no ejecute operaciones privilegiadas
+
+
+2_ Memoria virtual con paginacion por demanda
+
+
+   2_1 Defina todo lo necesario para implementar la tecnica
+
+   2_2 Explique que estructuras se utilizan y/o modifican de 2_1 cuando la cpu intenta acceder a la direccion de memoria de una pagina
+       que no se encuentra en memoria principal
+
+   2_3 Hiperpaginacion definicion y como puede ser tratada con working set
+
+
+3_ Sistema de archivos
+
+  Describa todo lo necesario para el manejo de archivos y directorios ya sea estructuras de datos
+  y hw necesario. Puede utilizar lo visto en la teoria (indexado, enlazado, etc) o bien elegir un 
+  sistema de archivos de los vistos en la teoria y describir como esta compuesto (System V o Windows fat)
+
+  Ejemplifique el uso mediante la creacion de un archivo

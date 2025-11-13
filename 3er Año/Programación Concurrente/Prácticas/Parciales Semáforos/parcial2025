@@ -1,0 +1,124 @@
+1. SEMÁFOROS
+
+
+int A [0 .. (1.000.000 - 1)];
+int N = 1.000.000;
+int total = 0;
+real promedio;
+int terminaron = 0;
+sem mutex = 1;
+sem espera = 9;
+sem imp = 1;
+
+
+Process Worker[id:0..9]{
+    int cant = 0;
+    for i := (id * (N/10)) to ((id+1) * (N/10)){
+        cant += A[i];
+    }
+
+    P(mutex);
+    terminaron++;
+    total += cant;
+    if (terminaron > 10){
+        V(mutex);
+        P(espera);
+    }
+    else{
+        V(mutex);
+        promedio = total / N;
+        for i := 0 to 8{
+            V(espera);
+        }
+    }
+
+    print (promedio);
+}
+
+
+2. SEMÁFOROS
+
+cola camiones [20];
+bool acopiadoraLibre := true;
+sem mutex = 1;
+
+Process Camión[0..19]{
+    P(mutex);
+    if (libre){
+        acopiadoraLibre := false;
+        V(mutex);
+    }
+    else{
+        c.push(id);
+        V(mutex);
+        P(espera[id]);
+    }
+
+    Descargar();
+    P(mutex);
+    if (camiones.isEmpty()){
+        acopiadoraLibre:= true;
+    }
+    else{
+        int aux := camiones.pop();
+        V(espera[aux]);
+    }
+    V(mutex);
+}
+
+
+3. MONITORES
+
+Monitor Consulta[id:0..1]{
+    cola consultas;
+    bool libre := true;
+    text rta;
+    text respuestas [100];
+
+
+    Procedure enviarConsulta (int in: tipo; text in: Consulta; text out: respuesta; int in: id){
+        consultas.push(Consulta,id);
+        signal(hayConsultas);
+        wait (espera);
+        respuesta := respuestas[id];
+    }
+
+
+
+    Procedure recibirConsulta(text out: Consulta; int out: Alumno);{
+        if (consultas.isEmpty()){
+            wait(hayConsultas);
+        }
+        Consulta := consultas.pop();
+        Alumno := consultas.pop();
+    }
+
+
+    Procedure devolverConsulta(text in: r; int in: Alumno){
+        respuestas[Alumno] := r;
+    }
+}
+
+
+Process Alumno{
+    int tipoConsulta := generarConsulta();
+    Consulta c; text respuesta;
+    enviarConsulta(tipoConsulta,c,respuesta);
+}
+
+Process Profesor{
+    while (true){
+        recibirConsulta(consulta);
+        // hacer consulta
+        devolverConsulta(respuesta);
+    }
+}
+
+Process Auxiliar{
+    while (true){
+        recibirConsulta(consulta);
+        // hacer consulta
+        devolverConsulta(respuesta);
+    }
+
+}
