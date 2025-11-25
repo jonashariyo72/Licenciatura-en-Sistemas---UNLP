@@ -1,0 +1,29 @@
+/* 
+Box = (nroBox, m2, ubicación, capacidad, ocupacion) // ocupación es un numérico indicando cantidad 
+de mascotas en el box actualmente, capacidad es una descripción. 
+Mascota = (codMascota, nombre, edad, raza, peso, telefonoContacto) 
+Veterinario = (matricula, CUIT, nombYAp, direccion, telefono) 
+Supervision = (codMascota(fk), nroBox(fk), fechaEntra, fechaSale?, matricula(fk), descripcionEstadia) 
+//fechaSale  tiene valor null si la mascota está actualmente en el box 
+
+
+1. Listar para cada veterinario cantidad de supervisiones realizadas con fecha de salida (fechaSale) 
+durante enero de 2024. Indicar matrícula, CUIT, nombre y apellido, dirección, teléfono y cantidad 
+de supervisiones. */
+
+SELECT v.matricula, CUIT, nombYAp, direccion, telefono, COUNT(DISTINCT s.codMascota, s.nroBox, s.fechaEntra) as cantidadSuperviciones
+FROM Veterinario v 
+INNER JOIN Supervision s ON (v.matricula = s.matricula)
+WHERE (s.fechaSale) >= '2024-01-01' AND (s.fechaSale) <= '2024-01-31'
+GROUP BY v.matricula, CUIT, nombYAp, direccion, telefono
+
+/* 2. Listar CUIT, matrícula, nombre, apellido, dirección y teléfono de veterinarios que no tengan 
+mascotas bajo supervisión actualmente. */
+
+SELECT CUIT, matricula, nombYAp, direccion, telefono
+FROM Veterinario v 
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM Supervision s
+    WHERE (s.fechaSale IS NULL) AND (v.matricula = s.matricula)
+)

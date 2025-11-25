@@ -1,0 +1,103 @@
+/* Vehiculo = (patente, modelo, marca, peso, km) 
+Camion = (patente(fk), largo, max_toneladas, cant_ruedas, tiene_acoplado) 
+Auto = (patente(fk), es_electrico, tipo_motor) 
+Service = (fecha, patente(fk), km_service, descripcion, monto) 
+Parte = (cod_parte, nombre, precio_parte) 
+Service_Parte = ([fecha, patente](fk), cod_parte(fk), precio) 
+
+
+1. Listar todos los datos de aquellos camiones que tengan entre 4 y 8 ruedas, y que hayan 
+realizado algún service en los últimos 365 días. Ordenar por marca, modelo y patente. */
+
+SELECT 
+    v.patente, v.modelo, v.marca, v.peso, v.km,
+    c.largo, c.max_toneladas, c.cant_ruedas, c.tiene_acoplado
+FROM Vehiculo v
+INNER JOIN Camion c ON v.patente = c.patente
+INNER JOIN Service s ON c.patente = s.patente
+WHERE c.cant_ruedas BETWEEN 4 AND 8
+  AND s.fecha >= CURRENT_DATE - INTERVAL 365 DAY
+ORDER BY v.marca, v.modelo, v.patente
+
+/* 2. Listar los autos que hayan realizado el service “cambio de aceite” antes de los 13.000 km o 
+hayan realizado el service “inspección general” que incluya la parte “filtro de combustible”. */
+
+SELECT a.patente
+FROM Auto a 
+WHERE EXISTS (
+  SELECT 1 
+  FROM Service s 
+  WHERE (s.patente = a.patente) AND (s.descripcion = 'cambio de aceite') AND (s.km_service <  13.000)
+)
+OR EXISTS (
+  SELECT 1
+  FROM Service s 
+  INNER JOIN Service_Parte sp ON (s.fecha = sp.fecha AND s.patente = sp.patente)
+  INNER JOIN Parte p ON (p.cod_parte = sp.cod_parte)
+  WHERE (s.patente = a.patente) AND (s.descripcion = 'inspección general') AND (p.nombre = 'filtro de combustible')
+)
+
+/* 3. Listar nombre y precio de todas las partes que aparezcan en más de 30 services que hayan 
+salido (partes) más de $4.000. */
+
+SELECT p.nombre, p.precio_parte
+FROM Parte p 
+INNER JOIN Service_Parte s ON (p.cod_parte = s.cod_parte)
+WHERE (p.precio_parte > 4000)
+GROUP BY p.cod_parte, p.nombre, p.precio_parte
+HAVING COUNT(p.cod_parte) > 30
+
+/* 4. Dar de baja todos los camiones con más de 250.000 km. */
+
+DELETE c
+FROM Camion c
+INNER JOIN Vehiculo v ON (v.patente = c.patente)
+WHERE v.km > 250000
+
+/* 5. Listar el nombre y precio de aquellas partes que figuren en todos los service realizados en el año 
+actual. */
+
+SELECT p.nombre, precio_parte
+FROM Parte p 
+INNER JOIN Service_Parte sp ON (p.cod_parte = sp.cod_parte)
+INNER JOIN Service s ON (sp.patente = s.patente AND sp.fecha = s.fecha)
+WHERE YEAR(s.fecha) = YEAR(CURDATE())
+GROUP BY p.cod_parte, p.nombre, p.precio_parte
+HAVING COUNT(DISTINCT s.fecha, s.patente) =
+(
+    SELECT COUNT(*)
+    FROM Service s2
+    WHERE YEAR(s2.fecha) = YEAR(CURDATE())
+)
+
+/* 6. Listar todos los autos que sean eléctricos. Mostrar información de patente, modelo, marca y 
+peso. */
+
+SELECT a.patente, modelo, marca, peso 
+FROM Auto a 
+INNER JOIN Vehiculo v ON (a.patente = v.patente)
+WHERE (es_electrico = true)
+
+/* 7. Dar de alta una parte, cuyo nombre sea “Aleron”  y precio $5000. */
+
+INSERT INTO Parte (cod_parte, nombre, precio_parte)
+VALUES (
+  1234, 'Aleron', 5000
+)
+
+/* 8. Dar de baja todos los services que se realizaron al auto con patente ‘AWA564’. */
+
+DELETE s
+FROM Service s 
+WHERE (s.patente = 'AWA564')
+
+DELETE s 
+FROM Service_Parte s 
+WHERE (s.patente = 'AWA564')
+
+/* 9. Listar todos los vehículos que hayan tenido services durante el 2024.  */
+
+SELECT v.patente
+FROM Vehiculo v 
+INNER JOIN Service s ON (v.patente = s.patente)
+WHERE (YEAR(s.fecha)) = 2024

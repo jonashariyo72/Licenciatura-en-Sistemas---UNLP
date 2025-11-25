@@ -1,0 +1,113 @@
+/* Proyecto = (codProyecto, nombrP,descripcion, fechaInicioP, fechaFinP?, fechaFinEstimada, 
+DNIResponsable(FK), equipoBackend(FK), equipoFrontend(FK)) // DNIResponsable corresponde a un 
+empleado, equipoBackend y equipoFrontend corresponden a equipos 
+Equipo = (codEquipo, nombreE, descTecnologias, DNILider(FK))//DNILider corresponde a un empleado 
+Empleado = (DNI, nombre, apellido, telefono, direccion, fechaIngreso) 
+Empleado_Equipo = (codEquipo(FK), DNI(FK), fechaInicio, fechaFin, descripcionRol) 
+
+
+1. Listar nombre, descripción, fecha de inicio y fecha de fin de proyectos ya finalizados que no 
+fueron terminados antes de la fecha de fin estimada.  */
+
+SELECT nombrP, descripcion, fechaInicioP, fechaFinP, fechaFinEstimada
+FROM Proyecto p 
+WHERE (fechaFinP IS NOT NULL) AND (fechaFinP > fechaFinEstimada)
+
+/* 2. Listar DNI, nombre, apellido, teléfono, dirección y fecha de ingreso de empleados que no son, ni 
+fueron responsables de proyectos. Ordenar por apellido y  nombre. */
+
+SELECT DNI, nombre, apellido, telefono, direccion, fechaIngreso
+FROM Empleado e
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM Proyecto p 
+    WHERE e.DNI = p.DNIResponsable
+)
+ORDER BY e.apellido, e.nombre
+
+/* 3. Listar DNI, nombre, apellido, teléfono y dirección de líderes de equipo que tenga más de un 
+equipo a cargo. */
+
+SELECT DNI, nombre, apellido, telefono, direccion
+FROM Empleado emp 
+INNER JOIN Equipo e ON (emp.DNI = e.DNILider)
+GROUP BY emp.DNI, nombre, apellido, telefono, direccion
+HAVING COUNT(e.codEquipo) > 1
+
+
+/* 4. Listar DNI, nombre, apellido, teléfono y dirección de todos los empleados que trabajan en el 
+proyecto con nombre ‘Proyecto X’. No es necesario informar responsable y líderes. */
+
+SELECT DNI, nombre, apellido, telefono, direccion
+FROM Empleado emp 
+WHERE EXISTS (
+    SELECT 1
+    FROM Equipo e
+    INNER JOIN Proyecto p ON (e.codEquipo = p.equipoBackend)
+    INNER JOIN Empleado_Equipo ep ON (e.codEquipo = ep.codEquipo)
+    WHERE (ep.DNI = emp.DNI) AND (emp.DNI <> e.DNILider) AND (emp.DNI <> p.DNIResponsable) AND (p.nombrP = 'Proyecto X')
+)
+OR EXISTS (
+    SELECT 1
+    FROM Equipo e
+    INNER JOIN Proyecto p ON (e.codEquipo = p.equipoFrontend)
+    INNER JOIN Empleado_Equipo ep ON (e.codEquipo = ep.codEquipo)
+    WHERE (ep.DNI = emp.DNI) AND (emp.DNI <> e.DNILider) AND (emp.DNI <> p.DNIResponsable) AND (p.nombrP = 'Proyecto X')
+
+)
+
+/* 5. Listar nombre de equipo y datos personales de líderes de equipos que no tengan empleados 
+asignados y trabajen con tecnología ‘Java’. */
+
+SELECT nombreE, emp.DNI, nombre, apellido, telefono, direccion
+FROM Equipo e 
+INNER JOIN Empleado emp ON (e.DNILider = emp.DNI)
+WHERE (descTecnologias) = 'Java' AND NOT EXISTS (
+    SELECT 1 
+    FROM Empleado_Equipo ee
+    WHERE (e.codEquipo = ee.codEquipo)
+)
+
+/* 6. Modificar nombre, apellido y dirección del empleado con DNI 40568965 con los datos que desee. */
+
+UPDATE Empleado e 
+SET nombre = 'Jonás',
+    apellido = 'Hariyo',
+    direccion = 'Calle 72, La Plata'
+WHERE (e.DNI) = '40568965'
+
+/* 7. Listar DNI, nombre, apellido, teléfono y dirección de empleados que son responsables de 
+proyectos pero no han sido líderes de equipo. */
+
+SELECT DNI, nombre, apellido, telefono, direccion
+FROM Empleado e 
+INNER JOIN Proyecto p ON (e.DNI = p.DNIResponsable)
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM Equipo eq 
+    WHERE (e.DNI = eq.DNILider)
+)
+
+/* 8. Listar nombre de equipo y descripción de tecnologías de equipos que hayan sido asignados 
+como equipos frontend y backend. */
+
+SELECT nombreE, descTecnologias
+FROM Equipo e 
+WHERE EXISTS (
+    SELECT 1 
+    FROM Proyecto p 
+    WHERE (e.codEquipo = p.equipoBackend)
+)
+AND EXISTS (
+    SELECT 1
+    FROM Proyecto p 
+    WHERE (e.codEquipo = p.equipoFrontend)
+)
+
+/* 9. Listar nombre, descripción, fecha de inicio, nombre y apellido de responsables de proyectos que 
+se estiman finalizar durante 2025. */
+
+SELECT nombrP, descripcion, fechaInicioP, r.nombre, r.apellido
+FROM Proyecto p 
+INNER JOIN Empleado r ON (p.DNIResponsable = r.DNI)
+WHERE (YEAR(p.fechaFinEstimada)) = 2025

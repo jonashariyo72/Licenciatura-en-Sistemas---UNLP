@@ -1,0 +1,128 @@
+/* Equipo = (codigoE, nombreE, descripcionE)  
+Integrante = (DNI, nombre, apellido, ciudad, email, telefono, codigoE(fk))  
+Laguna = (nroLaguna, nombreL, ubicación, extension, descripción)  
+TorneoPesca = (codTorneo, fecha, hora, nroLaguna(fk), descripcion) 
+Inscripcion = (codTorneo(fk), codigoE(fk), asistio, gano) // asistio y gano son true o false según 
+corresponda 
+
+
+1. Listar DNI, nombre, apellido y email de integrantes que sean de la ciudad ‘La Plata’ y estén 
+inscriptos en torneos disputados en 2023. 
+*/ 
+
+
+SELECT DNI, nombre, apellido, email
+FROM Integrante i 
+INNER JOIN Equipo e ON (i.codigoE = e.codigoE)
+INNER JOIN Inscripcion ins ON (e.codigoE = ins.codigoE)
+INNER JOIN TorneoPesca t ON (ins.codTorneo = t.codTorneo) 
+WHERE (ciudad) = 'La Plata' AND (YEAR(t.fecha)) = 2023
+
+
+
+/* 2. Reportar  nombre y descripción de equipos que solo se hayan inscripto en torneos de 2020.  */
+
+SELECT nombre, descripcion
+FROM Equipo e
+WHERE EXISTS (
+        SELECT 1
+        FROM Inscripcion i 
+        INNER JOIN TorneoPesca t ON (i.codTorneo = t.codTorneo)
+        WHERE (e.codigoE = i.codigoE) AND (YEAR(t.fecha)) = 2020
+)
+AND NOT EXISTS (
+        SELECT 1
+        FROM Inscripcion i 
+        INNER JOIN TorneoPesca t ON (i.codTorneo = t.codTorneo)
+        WHERE (e.codigoE = i.codigoE) AND (YEAR(t.fecha)) <> 2020
+)
+
+
+/* 3. Listar DNI, nombre, apellido,email y ciudad de integrantes que asistieron a torneos en la laguna con 
+nombre ‘La Salada, Coronel Granada’ y su equipo no tenga inscripciones a torneos disputados en 
+2023. */
+
+SELECT DISTINCT i.DNI, i.nombre, i.apellido, i.email, i.ciudad
+FROM Integrante i
+JOIN Inscripcion ins ON i.codigoE = ins.codigoE
+JOIN TorneoPesca t ON ins.codTorneo = t.codTorneo
+JOIN Laguna l ON t.nroLaguna = l.nroLaguna
+WHERE ins.asistio = TRUE
+  AND l.nombreL = 'La Salada, Coronel Granada'
+  AND NOT EXISTS (
+        SELECT 1
+        FROM Inscripcion ins2
+        JOIN TorneoPesca t2 ON ins2.codTorneo = t2.codTorneo
+        WHERE ins2.codigoE = i.codigoE
+          AND YEAR(t2.fecha) = 2023
+  )
+
+
+/* 4. Reportar  nombre y descripción de equipos que tengan al menos 5 integrantes.Ordenar por nombre. */
+
+SELECT nombreE, descripcionE
+FROM Equipo e 
+INNER JOIN Integrante i ON (e.codigoE = i.codigoE)
+GROUP BY e.codigoE, nombreE, descripcionE
+HAVING COUNT(i.DNI) > 4
+ORDER BY nombreE
+
+/* 5. Reportar  nombre y descripción de equipos que tengan inscripciones en todas las lagunas. */
+
+SELECT nombreE, descripcionE
+FROM Equipo e 
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM Laguna l
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM Inscripcion ins
+        JOIN TorneoPesca t ON ins.codTorneo = t.codTorneo
+        WHERE ins.codigoE = e.codigoE
+        AND t.nroLaguna = l.nroLaguna
+    )
+)
+
+/* 6. Eliminar el equipo con código 10000. */
+
+DELETE FROM Equipo e 
+WHERE (e.codigoE) = 10000
+
+/* 7. Listar nombre, ubicación,extensión y descripción de lagunas que no tuvieron torneos. */
+
+SELECT nombreL, ubicacion, extension, l.descripcion
+FROM Laguna l 
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM TorneoPesca t 
+    WHERE l.nroLaguna = t.nroLaguna
+)
+
+
+/* 8. Reportar nombre y descripción de equipos que tengan inscripciones a torneos a disputarse durante 
+2024, pero no tienen inscripciones a torneos de 2023.  */
+
+SELECT DISTINCT e.nombreE, e.descripcionE
+FROM Equipo e
+JOIN Inscripcion i ON e.codigoE = i.codigoE
+JOIN TorneoPesca t ON i.codTorneo = t.codTorneo
+WHERE YEAR(t.fecha) = 2024
+  AND NOT EXISTS (
+        SELECT 1
+        FROM Inscripcion ins2
+        JOIN TorneoPesca t2 ON ins2.codTorneo = t2.codTorneo
+        WHERE ins2.codigoE = e.codigoE
+          AND YEAR(t2.fecha) = 2023
+  )
+
+/* 9. Listar DNI, nombre, apellido, ciudad y email de integrantes que ganaron algún torneo que se disputó 
+en la laguna con nombre: ‘Laguna de Chascomús’. */
+
+
+SELECT DNI, nombre, apellido, ciudad, email
+FROM Integrante i 
+INNER JOIN Equipo e ON (i.codigoE = e.codigoE)
+INNER JOIN Inscripcion ins ON (e.codigoE = ins.codigoE)
+INNER JOIN TorneoPesca t ON (ins.codTorneo = t.codTorneo)
+INNER JOIN Laguna l ON (t.nroLaguna = l.nroLaguna)
+WHERE (gano) = true AND (nombreL) = 'Laguna de Chascomús'
