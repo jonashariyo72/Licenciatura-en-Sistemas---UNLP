@@ -1,5 +1,6 @@
-# Entrevista de Elicitación (Grupo 34) - Parte 1
+# Entrevista de Elicitación (NS SOLUTIONS) - Parte 1
 
+* **Preparado por:** NS Solutions
 * **Entrevistado:** Ailén . Dueña del negocio. 
 * **Fecha:** 13 de marzo de 2026  
 * **Hora:** 15:50
