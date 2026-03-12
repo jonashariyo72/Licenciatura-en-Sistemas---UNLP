@@ -1,13 +1,13 @@
 # Entrevista de Elicitación (Grupo 34) - Parte 1
 
-![Logo NS SOLUTIONS](Grupo/logo_ns_solutions.png)
+![Logo NS SOLUTIONS](../Grupo/logo_ns.png)
 
-**Entrevistado:** Ailén . Dueña del negocio. 
-**Fecha:** 13 de marzo de 2026  
-**Hora:** 15:50
-**Lugar:** Facultad de Informática - Aula 15
-**Fase del proyecto:** Elicitación de Requerimientos
-**Tiempo Estimado de la entrevista:** 30 minutos
+* **Entrevistado:** Ailén . Dueña del negocio. 
+* **Fecha:** 13 de marzo de 2026  
+* **Hora:** 15:50
+* **Lugar:** Facultad de Informática - Aula 15
+* **Fase del proyecto:** Elicitación de Requerimientos
+* **Tiempo Estimado de la entrevista:** 30 minutos
 
 ## Objetivos:
 
