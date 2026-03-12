@@ -1,6 +1,8 @@
 # Entrevista de Elicitación (Grupo 34) - Parte 1
 
-![Logo NS SOLUTIONS](../Grupo/logo_ns.png)
+<p align="right">
+  <img src="../Grupo/logo_ns.png" alt="NS SOLUTIONS Logo" width="150"/>
+</p>
 
 * **Entrevistado:** Ailén . Dueña del negocio. 
 * **Fecha:** 13 de marzo de 2026  
