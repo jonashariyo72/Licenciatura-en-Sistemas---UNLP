@@ -1,7 +1,7 @@
 # Entrevista de Elicitación (NS SOLUTIONS) - Parte 1
 
 * **Preparado por:** NS Solutions
-* **Entrevistado:** Laura    . Dueña del negocio. 
+* **Entrevistado:** Laura. Dueña del negocio. 
 * **Fecha:** 13 de marzo de 2026  
 * **Hora:** 15:50
 * **Lugar:** Facultad de Informática - Aula 15
@@ -113,4 +113,5 @@ Por ahora no, tenemos sola sucursal y no pensamos en eso.
 
 El logo del centro es amarillo y verde, me gustaría que la página tenga esos colores.
 En cuanto a la falta de algún kinesiólogo, si se ausenta, se intenta cubrir con otro, no contemplamos eso.
-Si el cliente se encuentra en lista de espera, y se libera un lugar le manda un mail a la persona que se  encuentra primera en la lista de espera. 
+Si el cliente se encuentra en lista de espera, y se libera un lugar le manda un mail a la persona que se  encuentra primera en la lista de espera.
+El Kinesiologo/Empleado podría tener una cuenta para marcar la asistencia pero puede hacerlo con la cuenta de Administrador.
