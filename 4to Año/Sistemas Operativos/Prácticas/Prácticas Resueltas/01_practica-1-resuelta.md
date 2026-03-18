@@ -94,3 +94,89 @@ preliminares que necesitarde esta guía de estudio.
 > - Aplicación de parches y actualizaciones 
 > - Seguridad
 
+
+### 8. ¿Cuáles son las distintas opciones y menús para realizar la configuración de opciones de compilación de un kernel? Cite diferencias, necesidades (paquetes adicionales de software que se pueden requerir), pro y contras de cada una de ellas.
+
+> Existen principalmente tres interfaces para generar el archivo `.config`:
+> - ***make config:*** Es una interfaz en modo texto y secuencial. Se considera tediosa ya que pregunta por cada opción una por una.
+> - ***make xconfig:*** Es una interfaz gráfica basada en ventanas. Su contra es que requiere tener instalado el sistema de ventanas X y librerías de desarrollo de Qt.
+> - ***make menuconfig:*** Utiliza la librería ncurses para generar una interfaz de menús y paneles dentro de la terminal. Es la más utilizada por ser flexible y no requerir entorno gráfico.
+
+
+### 9. Indique qué tarea realiza cada uno de los siguientes comandos durante la tarea de configuración/compilación del kernel: 
+> - a. `make menuconfig`: Lanza la herramienta de configuración basada en ncurses para seleccionar qué funcionalidades incluir como built-in (), como módulo () o no incluirlas (<*><M><>).
+> - b. `make clean`: Borra los archivos binarios e intermedios generados en compilaciones previas para asegurar que la nueva configuración se aplique correctamente desde cero.
+> - c. `make` **(investigue la funcionalidad del parámetro -j)**:  Es el comando principal que lee el Makefile, interpreta las reglas y lanza el proceso de compilación del kernel y sus módulos.
+>***Parámetro -jX:*** Permite la compilación paralela ejecutando X procesos simultáneos. Se recomienda que X sea igual al número de procesadores/hilos del equipo (verificable con ) para acelerar significativamente el procesolscpu.
+> - d. `make modules`**(utilizado en antiguos kernels, actualmente no es necesario)**: Compila específicamente los fragmentos de código seleccionados como módulos cargables. En kernels actuales, esta tarea suele estar integrada en el comando  generalmake.
+> - e. `make modules_install`: Copia los módulos recién compilados al directorio correspondiente del sistema, generalmente /lib/modules/versión-del-kernel. 
+> - f. `make install `: Automatiza la instalación de la imagen del kernel, el archivo  y el  en, además de generar el initramfs y actualizar el gestor de arranqueSystem.map.config/boot.
+
+
+
+
+### 10. Una vez que el kernel fue compilado, ¿dónde queda ubicada su imagen? ¿dónde  debería ser reubicada? ¿Existe algún comando que realice esta copia en forma automática?
+
+> - ***Ubicación inicial:*** Tras la compilación, la imagen queda en el árbol de fuentes, específicamente en (por ejemplo,arch/arquitectura/boot/arch/x86_64/boot/bzImage).
+> - ***Reubicación***: Debe ser movida al directorio /boot y renombrada (ej. vmlinuz-6.13.7).
+> - ***Comando automático:*** El comando make install realiza esta copia y el resto de la configuración de forma automática.
+
+
+### 11. ¿A qué hace referencia el archivo initramfs? ¿Cuál es su funcionalidad? ¿Bajo qué condiciones puede no ser necesario?
+
+> El **initramfs** es un sistema de archivos temporal (basado en RAM) que se monta durante el arranque del sistema. Su ***funcionalidad*** se basa en contener los binarios, drivers y módulos mínimos necesarios (como drivers de disco o sistemas de archivos) para poder montar el sistema de archivos raíz real en el disco duro .
+>Cuándo no es necesario: Podría no ser necesario si todos los drivers críticos para acceder al disco y al sistema de archivos raíz están compilados como built-in en el kernel, de modo que este no necesite cargar módulos adicionales para terminar el arranque.
+
+
+### 12. ¿Cuál es la razón por la que una vez compilado el nuevo kernel, es necesario reconfigurar el gestor de arranque que tengamos instalado?
+
+> Es necesario reconfigurar el gestor de arranque (como GRUB 2) para que este detecte e indexe la nueva imagen del kernel instalada en /boot. Sin este paso, el menú de inicio no mostrará la opción para arrancar con el nuevo kernel. En sistemas basados en Debian, esto se hace con el comando update-grub2.
+
+
+### 13. ¿Qué es un módulo del kernel? ¿Cuáles son los comandos principales para el manejo de módulos del kernel?
+
+> Es un **fragmento de código** que puede cargarse o descargarse en memoria bajo demanda.
+> **Características:** Permiten extender la funcionalidad del núcleo (drivers, sistemas de archivos) en "caliente" sin reiniciar el sistema. Se ejecutan en modo ***privilegiado*** (modo kernel).
+>*Comandos principales:*
+> - ***lsmod:*** Lista los módulos cargados actualmente.
+> - ***modprobe / insmod:*** Para cargar módulos (fuera de las fuentes pero estándar en Linux).
+> - ***rmmod***: Para descargar módulos.
+
+
+### 14. ¿Qué es un parche del kernel? ¿Cuáles son las razones principales por las cuáles se deberían aplicar parches en el kernel? ¿A través de qué comando se realiza la aplicación de parches en el kernel? 
+
+> Un parche es un ***mecanismo basado en archivos diff*** (archivos de diferencia) que permite aplicar actualizaciones o modificaciones sobre una versión base del código fuente.
+
+> ***Razones para aplicarlos:*** Corregir errores de seguridad, añadir soporte de hardware (drivers) o actualizar la versión del kernel sin descargar todo el código fuente nuevamente.
+
+> ***Comando:*** Se realiza mediante la herramienta patch, usualmente de la forma: xzcat parche.xz | patch -p1.
+
+
+### 15. Investigue la característica Energy-aware Scheduling incorporada en el kernel 5.0 y explique brevemente con sus palabras:
+
+### - a. ¿Qué característica principal tiene un procesador ARM big.LITTLE? 
+>  Es una arquitectura que combina núcleos de alto rendimiento y alto consumo (big) con núcleos de bajo rendimiento y muy bajo consumo (LITTLE) en el mismo chip.
+
+### - b. En un procesador ARM big.LITTLE y con esta característica habilitada. Cuando se despierta un proceso ¿a qué procesador lo asigna el scheduler?
+> Con EAS habilitado, cuando un proceso despierta, el scheduler utiliza un modelo energético para predecir qué CPU podrá manejar la tarea con el mínimo incremento de consumo de energía total del sistema, en lugar de buscar simplemente el núcleo más rápido
+.
+
+### - c. ¿A qué tipo de dispositivos opinás que beneficia más esta característica?
+> Esta característica beneficia principalmente a dispositivos operados por baterías, como smartphones y laptops, donde la eficiencia energética es crítica para prolongar la autonomía.
+
+### 16. Investigue la system call memfd_secret() incorporada en el kernel 5.14 y explique brevemente con sus palabras
+---
+
+### a. ¿Cuál es su propósito?
+> Su **propósito principal** es crear una región de memoria que sea invisible para casi todo el sistema, incluido el propio Kernel.  Normalmente, el Kernel de Linux tiene algo llamado "mapa directo" (direct map), que es una zona de memoria donde el Kernel puede ver absolutamente todo lo que pasa en la RAM. memfd_secret() rompe esa regla: cuando se usa, esa porción de memoria se elimina del mapa directo del Kernel. Solo el proceso que la creó (y sus hijos, si se configura así) puede ver lo que hay ahí.
+
+### b. ¿Para qué puede ser utilizada?
+> Se utiliza principalmente para seguridad extrema y mitigación de ataques de hardware (como Spectre o Meltdown). Sus usos más comunes son:
+
+> - ***Almacenar claves criptográficas:*** Para que, si un atacante logra "romper" el kernel, no pueda simplemente leer la RAM y llevarse tus contraseñas o llaves privadas.
+
+> - ***Sandbox de datos sensibles:*** Aplicaciones que manejan datos bancarios o médicos pueden usar esto para asegurarse de que ninguna otra parte del sistema pueda husmear en esos datos, incluso si hay un error en el sistema operativo.
+
+### c. ¿El kernel puede acceder al contenido de regiones de memoria creadas con esta system call?
+>No. Al remover esas páginas de memoria del direct map, el Kernel pierde la capacidad de leer o escribir en ellas de forma directa.Si el Kernel intentara acceder a esa dirección de memoria "secreta", se produciría un fallo (page fault).
+
