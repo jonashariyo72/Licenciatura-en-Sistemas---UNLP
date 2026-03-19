@@ -81,12 +81,91 @@
     ● Indique cuáles de los atributos del ejercicio anterior posee el/los lenguaje/s elegidos y cuáles 
     no posee, justifique en cada caso. 
 
+    ---
+
+## 4. Lenguaje elegido: JAVA 
+> - ***Tipos de expresiones:*** Soporta expresiones aritméticas, lógicas y relacionales. En Java, la asignación es una expresión que devuelve un valor.
+> - ***Organización del programa:*** Utiliza paquetes para agrupar clases relacionadas, interfaces para definir comportamientos y un sistema de archivos que refleja la estructura de clases.
+> - ***Atributos:***
+>   - **Confiabilidad:** Posee (tipado fuerte, recolección de basura automática que evita fugas de memoria).
+>   - **Simplicidad:** Parcialmente (elimina punteros explícitos de C++, pero su estructura de clases puede ser verbosa).
+>   - **Ortogonalidad:** No totalmente (distingue entre tipos primitivos y objetos, lo que requiere clases "envoltorio").
+---
+
 
 ## Lenguajes    -    ADA 
 
 ### Ejercicio 5: Describa las características más relevantes de Ada, referida a: 
-    ● Tipos de datos 
-    ● Tipos abstractos de datos – paquetes  
-    ● Estructuras de datos 
-    ● Manejo de excepciones 
-    ● Manejo de concurrencia 
+> - *Tipos de datos*:  Es un lenguaje fuertemente tipado. Incluye tipos escalares (enteros, reales, enumerativos), tipos de acceso (punteros controlados) y tipos compuestos (arrays y registros). 
+> - *Tipos abstractos de datos – paquetes*:  Los paquetes permiten separar la especificación (interfaz pública) de la implementación (cuerpo privado), facilitando la ocultación de información.
+> - *Estructuras de datos*: Ofrece arrays restringidos y no restringidos (unconstrained), registros variantes para uniones discriminadas y una rica jerarquía de tipos.
+> - *Manejo de excepciones*: Provee un mecanismo robusto para interceptar errores en tiempo de ejecución () y definir manejadores específicos () para continuar la ejecución de forma seguraraisewhen.
+> - *Manejo de concurrencia*: Introduce las tareas () como unidades que se ejecutan en paralelo, tipos protegidos para exclusión mutua y el mecanismo de  cita () para la sincronización entre procesos `tasks` `rendezvous`.
+
+## Lenguajes    -    JAVA
+
+### Ejercicio 6: Diga para qué fue, básicamente, creado Java.¿Qué cambios le introdujo a la Web? ¿Java es un lenguaje dependiente de la plataforma en dónde se ejecuta? ¿Por qué?
+
+> ***Origen:*** Java fue creado originalmente por James Gosling y su equipo en Sun Microsystems como un lenguaje para sistemas embebidos en electrodomésticos (como hornos microondas).
+> ***Cambios en la Web:*** Introdujo el concepto de "escribir una vez, ejecutar en cualquier lugar" (write once, run anywhere), lo cual fue ideal para el crecimiento de Internet y redes, permitiendo la distribución de software a través de arquitecturas diversas.
+> ***Independencia de plataforma:*** Java no es dependiente de la plataforma física. Esto se debe a que el compilador traduce el código fuente a un código intermedio llamado byte code, el cual es independiente de la máquina. Este byte code es ejecutado por una Máquina Virtual Java (JVM) específica para cada sistema operativo, que actúa como intérprete.
+
+### Ejercicio 7: ¿Sobre qué lenguajes está basado? 
+
+> **Java** está basado fundamentalmente en la sintaxis de C++ para atraer a una amplia base de programadores. Además, adoptó muchas características de Smalltalk, como la recolección automática de basura y el uso de referencias en lugar de punteros explícitos.
+
+### Ejercicio 8: ¿Qué son los applets? ¿Qué son los servlets?  
+
+> Los ***Applets*** son pequeñas aplicaciones Java que se ejecutan en el navegador del cliente,, permitiendo la creación de contenido interactivo como gráficos, animaciones y juegos. Mientras que los ***Servlets*** son componentes que se ejecutan en el servidor para generar contenido dinámico, interactuar con el cliente a través de un modelo de solicitud-respuesta.
+
+
+## Lenguajes    -    C
+
+### Ejercicio 9: ¿Cómo es la estructura de un programa escrito en C? ¿Existe anidamiento de funciones? 
+
+> **Estructura:** Un programa en C consiste en uno o varios archivos. Se organiza mediante directivas de preprocesador (), declaraciones externas o globales y definiciones de funciones#include. Todo programa debe tener una función llamada  para iniciar su ejecuciónmain.
+> **Anidamiento:** En C no existe el anidamiento de funciones (no se puede definir una función dentro de otra). Solo se permite el anidamiento de sentencias compuestas o bloques dentro de las funciones.
+
+
+### Ejercicio 10: Describa el manejo de expresiones que brinda el lenguaje.
+
+> En ***C***, la distinción entre sentencias de asignación y expresiones es ***tenue***; una asignación es en sí misma una expresión que devuelve el valor asignado como resultado. Permite asignaciones múltiples en una sola línea (ej. a = b = c = 0). Permite que cualquier expresión que devuelva un l-value (una dirección de memoria modificable) aparezca a la izquierda de un operador de asignación.
+
+
+## Lenguajes - Python, RUBY, PHP
+
+### Ejercicio 11: ¿Qué tipo de programas se pueden escribir con cada uno de estos lenguajes? ¿A qué paradigma responde cada uno? ¿Qué características determinan la pertenencia a cada paradigma?  
+
+> - **Python:** Se utiliza para scripting de propósito general, experimentación rápida y enseñanza. Responde al paradigma Orientado a Objetos y soporta un estilo imperativo.
+> - **Ruby:** Muy utilizado en aplicaciones cliente/servidor web y dispositivos móviles. Es un lenguaje puramente Orientado a Objetos.
+> - **PHP:** Mencionado como un lenguaje interpretado ideal para aplicaciones web.
+> - **Determinación de paradigma:** La pertenencia se determina por la unidad de modularización (clases en OO, funciones en funcional) y el modelo de cómputo (cambio de estado en imperativo, evaluación de funciones en funcional).
+
+### Ejercicio 12: Cite otras características importantes de Python, Ruby, PHP, Gobstone y Processing. Por ejemplo: tipado de datos,  cómo se organizan los programas, etc. 
+
+> - ***Python***: Utiliza identación para definir bloques de código. Posee tipado dinámico fuerte (los tipos se verifican en tiempo de ejecución pero no se permiten operaciones inválidas entre tipos). Tiene recolección de basura automática.
+> - ***Ruby:*** Se caracteriza por su ortogonalidad, ya que casi todo es un objeto y toda sentencia es una expresión. Su sintaxis se describe como simple, elegante y concisa.
+> - ***PHP*** es un lenguaje de programación de código abierto, multiplatafórmico, se integra bien con HTML, lo que le permite crear páginas webs dinámicas.
+> - ***Gobstones*** se destaca por su entorno visual y intuitivo.
+> - ***Processing*** es un lenguaje de desarrollo integrado de código abierto que se basa en *Java*.
+
+
+## Lenguaje - JAVASCRIPT
+
+### Ejercicio 13: ¿A qué tipo de paradigma corresponde este lenguajes? ¿A qué tipo de Lenguaje pertenece? 
+
+> ***Javascript*** se utiliza principalmente para aplicaciones basadas en la Web. Se sitúa junto a Java y Python como lenguajes que han incorporado características que los alejan de C y los acercan a conceptos de Lisp (paradigma funcional/dinámico).
+
+### Ejercicio 14: Cite otras características importantes de javascript. Tipado de datos, excepciones, variables, etc.
+
+> **JavaScript** es un lenguaje ***débilmente tipado y dinámico***, lo que significa que no se define el tipo de una variable al instanciarla. El tipo de la variable se asigna atendiendo al valor que le asignemos. 
+> - Es un ***lenguaje imperativo***, lo que significa que las sentencias se ejecutan de manera secuencial, no realiza un proceso de compilación a código máquina, sino que necesita de un interprete para obtener el lenguaje máquina. 
+> - Es un ***lenguaje sencillo y extensible***, lo que significa que no hace falta tener amplios conocimientos de programación para desarrollar programas. 
+> - Es un lenguaje ***multiplataforma***, lo que significa que puede ser ejecutado en diferentes sistemas operativos y plataformas.
+> - Es un lenguaje ***orientado a objetos***, lo que significa que se basa en la creación de objetos y la programación orientada a objetos. Esto permite una gran flexibilidad en la creación de objetos y su manipulación.
+
+
+
+
+
+
