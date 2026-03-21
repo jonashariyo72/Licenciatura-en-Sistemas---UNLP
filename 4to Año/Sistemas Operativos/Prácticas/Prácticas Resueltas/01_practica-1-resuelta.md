@@ -180,3 +180,23 @@ preliminares que necesitarde esta guía de estudio.
 ### c. ¿El kernel puede acceder al contenido de regiones de memoria creadas con esta system call?
 >No. Al remover esas páginas de memoria del direct map, el Kernel pierde la capacidad de leer o escribir en ellas de forma directa.Si el Kernel intentara acceder a esa dirección de memoria "secreta", se produciría un fallo (page fault).
 
+## B - Ejercicio taller: Compilación del kernel Linux 
+
+### El propósito de este ejercicio es que las y los estudiantes comprendan los pasos básicos del proceso de compilación del kernel de GNU/Linux.  Si bien esta práctica es guiada es aconsejable que las y los alumnas/os investiguen las  distintas opciones y comandos utilizados.  Para la realización de este taller compilaremos la versión 6.13.7 del kernel Linux. Pero en  lugar de descargar la versión deseada descargaremos la 6.13 y la actualizaremos a  6.13.7 mediante la aplicación un parche (patch) a modo de práctica.  Compilaremos un kernel Linux con las siguientes funcionalidades:  Soporte para sistemas de archivos BTRFS. Soporte para la utilización de dispositivos de bloques loopback 
+
+### 1. Descargue los siguientes archivos en un sistema GNU/Linux moderno, sugerimos descargarlo en el directorio $HOME/kernel/ (donde $HOME es el directorio del usuario no privilegiado que uses):  
+### a. El archivo btrfs.image.xz publicado en la página web de la cátedra. 
+### b. El código fuente del kernel 6.13 (https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/linux-6.13.tar.xz). 
+### c. El parche para actualizar ese código fuente a la versión 6.13.7  (https://cdn.kernel.org/pub/linux/kernel/v6.x/patch-6.13.7.xz).
+
+
+### 2. Preparación del código fuente: 
+### a. Posicionarse en el directorio donde está el código fuente y descomprimirlo: 
+### $ cd $HOME/kernel/ 
+### $ tar xvf /usr/src/linux-6.13.tar.xz 
+ 
+### b. Emparchar el código para actualizarlo a la versión 6.8 usando la herramienta patch: 
+### $ cd $HOME/kernel/linux-6.13 
+### $ xzcat /usr/src/patch-6.13.7.xz | patch -p1 
+
+> Pasos realizados en la máquina virtual VirtualBox
