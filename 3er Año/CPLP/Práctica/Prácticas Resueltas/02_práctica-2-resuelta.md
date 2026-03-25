@@ -219,3 +219,41 @@
 > - Es ambigua porque en la línea `<bloque> ::= <sentencia> | <sentencia><bloque> | <bloque><sentencia>` da la posibilidad de que se derive de dos manera diferents.
 > - `<otro>` no está definido en P.
 > - `<sentencia_if>`, `<sentencia_for>`, `<sentencia_swtich>`, no están ni en N.
+
+### Ejercicio 12: Realice en EBNF la gramática para la definición un tag div en html 5. (Puede  ayudarse con el siguiente enlace (https://developer.mozilla.org/es/docs/Web/HTML/Elemento/div)
+
+> - ***G = {N,T,S,P}***
+> - ***N = {div, class, texto, atributos, contenido, caracter,style}***
+> - ***T = {$\{ "<div>", "</div>", "style=", "class ="  "=", ' " ', "/", "a" ... "z", "A" ... "Z", "0" ..."9", " ", "-", "_", "." \}$}***
+> - ***S = div*** 
+> -  ***P {***
+> -       div ::= "<div" [ atributos ] ">" contenido "</div>"
+> -       atributos = { " " ( class | style ) }
+> -       style ::= 'style="' texto '"'
+> -      class ::=  'class="' texto '"'
+> -      contenido ::= { texto | div }
+> -      texto ::= caracter { caracter }
+> -      caracter ::= "=", ' " ', "/", "a" ... "z", "A" ... "Z", "0" ..."9", " ", "-", "_", "."
+> - ***}***
+
+### Ejercicio 13: Defina en EBNF una gramática para la construcción de números primos.¿Qué debería agregar a la gramática para completar el ejercicio?
+
+> La gramática para este ejercicio no sería suficiente porque habría que agregarle la parte ***semántica*** para la regla de qué números son primos.
+
+### Ejercicio 14: Sobre un lenguaje de su preferencia escriba en EBNF la gramática para la definición de funciones o métodos o procedimientos (considere los parámetros en caso de ser necesario)
+> ***Lenguaje: **Pascal*****
+> - ***G = {N,T,S,P}***
+> - ***N = {`<función>`, `<id>`, `<parámetro>`, `<tipo>`, `<instrucción>`,`<integer>`, `<string>`, `<char>`,`<real>`, `<boolean>`, `<asig>`, `<while>`, `<for>`, `<llamado_a_módulo>`, `<if>`}***
+> - ***T = {$\{ function, (, ),  var, begin, end;, integer, string, boolean, char,real, ;, "=", ' " ', "/", "a" ... "z", "A" ... "Z", "0" ..."9", " ", "-", "_", "." \}$}***
+> - ***S = {función}*** 
+> -  ***P {***
+> -       <función> ::= "function" <id> "(" { ["var"] <parámetro> ":" <tipo> [; ["var"] <parámetro> ":" <tipo>] }* ")" ":" <tipo> ";"
+> -      "begin" {instrucción}+ "end;"
+> -      parámetro ::= texto
+> -      nombre ::= texto
+> -      tipo ::= (<integer> | <string> | <char> | <boolean> | <real>) 
+> -      instrucción ::= <asig> | <while> | <for> | <llamado_a_módulo> | <if>
+> -      texto ::= <caracter> { <caracter> }*
+> -      caracter ::= ("="| ' " '| "/"| "a" ... "z"| "A" ... "Z"| "0" ..."9"|  ", "| "-"| "_"| ".")
+> - ***}***
+> - [nota] Los "No Terminales" como los tipos de dato o tipos de instrucción no hace falta definirlos, pero habría que preguntarlo.
