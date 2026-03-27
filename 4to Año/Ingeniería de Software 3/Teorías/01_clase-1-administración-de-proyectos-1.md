@@ -1,4 +1,4 @@
-## Clase 1 - Administración de Proyectos
+## Clase 1 - Administración de Proyectos (Parte 1)
 
 
 # Proyecto
@@ -114,3 +114,5 @@ Un programa es un grupo de proyectos relacionados. En conjunto todos entregan be
 - El éxito se mide en términos de retorno de la inversión, nuevas capacidades y prestaciones para la organización
 - Los directores de programas gestionan los líderes de proyectos
 - El estilo de liderazgo se centra en la gestión de las relaciones y resolución de conflictos
+
+
