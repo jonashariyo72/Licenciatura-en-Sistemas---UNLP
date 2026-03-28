@@ -200,3 +200,25 @@ preliminares que necesitarde esta guía de estudio.
 ### $ xzcat /usr/src/patch-6.13.7.xz | patch -p1 
 
 > Pasos realizados en la máquina virtual VirtualBox
+
+
+## C - Poner a prueba el kernel compilado 
+btrfs.image.xz es un archivo de 110MiB formateado con el filesystem BTRFS y luego 
+comprimido con la herramienta xz. Dentro contiene un script que deberás ejecutar en una máquina con acceso a Internet (puede ser la máquina virtual provista por la cátedra) para realizar la entrega obligatoria de esta práctica. 
+Para acceder al script deberás descomprimir este archivo y montarlo como si fuera un disco usando el driver “Loopback device” que habilitamos durante la compilación del kernel. 
+***Usando el kernel 6.13.7*** compilado en esta práctica: 
+#### 1. Descomprimir el filesystem con: 
+    $ unxz btrfs.image.xz 
+
+#### 2. Verificaremos que dentro del directorio /mnt exista al menos un directorio donde podamos montar nuestro pseudo dispositivo. Si no existe el directorio, crearlo. Por ejemplo podemos crear el directorio /mnt/btrfs/. 
+
+#### 3. A continuación montaremos nuestro dispositivo utilizando los siguientes comandos: 
+    $ su - 
+    # mount -t btrfs -o loop $HOME/btrfs.image /mnt/btrfs/ 
+
+
+#### 4. Diríjase a /mnt/btrfs y verifique el contenido del archivo README.md. 
+
+> Práctica 1 terminada!
+
+![alt text](image.png)
