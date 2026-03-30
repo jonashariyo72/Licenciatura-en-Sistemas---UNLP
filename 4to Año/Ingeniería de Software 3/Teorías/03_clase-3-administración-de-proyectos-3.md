@@ -16,11 +16,16 @@
 
 ## 3. Modelo COCOMO (Constructive Cost Model)
 > Es un modelo de costos desarrollado por Barry Boehm que utiliza una fórmula base: E=a×S b×F, donde E es el esfuerzo (personas-mes), S es el tamaño (en miles de líneas de código fuente entregables o KDSI), F es un factor de ajuste y a,b son constantes.
-> ***Clasificación de Sistemas***: COCOMO define tres tipos de sistemas para determinar las constantes de cálculo:
+> - La fórmula es ***PM = c KLOC^k***
+> - **PM** -> esfuerzo en personas mes 
+> - **c** y **k** constantes dadas por el modelo. k > 1
+> - ***Clasificación de Sistemas***: COCOMO define tres tipos de sistemas para determinar las constantes de cálculo:
 > - ***Orgánico:*** Sistemas de procesamiento de datos simples y transaccionales (ej. facturación).
 > - ***Embebido:*** Software de tiempo real integrado a hardware complejo (ej. control de ascensores).
 > - ***Semi-embebido:*** Un punto intermedio con mayor procesamiento de transacciones (ej. monitoreo de redes).
 
+> - ***No*** es sabio ***confiar ciegamente*** en los resultados del modelo.
+> - PERO, ***es menos sabio*** *ignorar* el valor de las herramientas que  complementan el juicio experto y la intuición
 
 > **Versiones del Modelo**
 > - ***Básico:*** Se usa cuando se conoce muy poco del proyecto (el factor de ajuste F es igual a 1).
@@ -29,7 +34,7 @@
 
 
 ## 4. Conductores de Costos (Cost Drivers)
->En el modelo intermedio, el esfuerzo inicial se revisa mediante 15 conductores agrupados en cuatro categorías:
+> Son ***criterios*** que influyen en el cálculo del COCOMO. En el modelo intermedio, el esfuerzo inicial se revisa mediante 15 conductores agrupados en cuatro categorías:
 > - ***Atributos del Producto:*** Confiabilidad requerida (RELY), tamaño de base de datos (DATA) y complejidad (CPLX).
 > - ***Atributos del Hardware:*** Restricciones de tiempo (TIME) y almacenamiento (STOR), volatilidad de máquina virtual (VIRT).
 > - ***Atributos del Personal:*** Capacidad de analistas (ACAP) y programadores (PCAP), experiencia en la aplicación (AEXP), lenguaje (LEXP) y máquina virtual (VEXP).
@@ -41,7 +46,6 @@
 > Es una actualización para adaptarse a tecnologías modernas y ciclos de vida iterativos. Se basa en tres etapas:
 > - ***Prototipos:*** Utiliza Puntos Objeto (basado en número de pantallas, reportes y componentes 3GL).
 > - ***Decisiones de Arquitectura***: Utiliza Puntos Función (basado en entradas, salidas, consultas y archivos externos/internos).
-
 > - ***Diseño Detallado:*** Utiliza líneas de código (KDSI).
 
 ### Economía de Escala
