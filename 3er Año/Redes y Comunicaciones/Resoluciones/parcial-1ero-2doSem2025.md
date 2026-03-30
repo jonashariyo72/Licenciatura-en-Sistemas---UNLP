@@ -1,6 +1,6 @@
 # Parcial Redes y Comunicaciones - 1era Fecha 2do Semestre 2025
 
-![alt text](image.png)
+![alt text](Capturas/image.png)
 
 ### 1) Utilizando el bloque de red 49.183.68.0/23: 
 #### a.  Asignar direcciones de red a cada una de las redes de la topología del Diagrama #1. 
@@ -125,7 +125,7 @@
 
 ### 6. A partir del intercambio siguiente: 
 
-![alt text](image-1.png)
+![alt text](Capturas/image-1.png)
 
 #### a. ¿Obtuvo el recurso solicitado? En caso negativo, ¿qué acción debe tomar el cliente para poder obtener el recurso? 
 > No se obtuvo el recurso solicitado porque este fue movido de lugar (***301 Moved Permanently***). El cliente debe ir a buscar el recurso a la ubicación que indica la cabecera ***Location*** (/menu/index.html).
@@ -137,7 +137,7 @@
 
 ### 7. Observe la siguiente captura de tráfico y responda:
 
-![alt text](image-2.png)
+![alt text](Capturas/image-2.png)
 
 #### a. ¿Qué está intentando hacer el host 172.217.29.145? 
 > Está intentando establecer conexión con *172.217.29.253:80* a través de 3WH.
