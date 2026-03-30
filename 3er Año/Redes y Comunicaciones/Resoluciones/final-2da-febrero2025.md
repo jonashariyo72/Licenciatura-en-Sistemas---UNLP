@@ -1,4 +1,4 @@
-# Final Redes y Comunicaciones - 2da Mesa Febrero
+# Final Redes y Comunicaciones - 2da Mesa Febrero 2026
 
 ### 1)
 
@@ -49,4 +49,11 @@
 
 ### a)
 
-> | **MAC Origen**: MAC_R1_IFACE1 | **MAC Destino**: MAC_R2_IFACE2 | **IP Origen**: 10.0.0.1 | **IP Destino**: 10.0.0.2|
+> | **MAC Origen**: MAC_R1_eth1 | **MAC Destino**: MAC_R2_eth2 | **IP Origen**: 172.17.1.10 | **IP Destino**: 163.10.0.10|
+
+### b) 
+
+> *NAPT* traduce muchas IP privadas a una sola IP pública usando puertos. Entonces:
+> - La comunicación es: PC-A (172.17.1.10) → Web Server (163.10.0.10)
+> - Como PC-A tiene IP privada, se cambia a la IP pública de R2
+> - Así que queda: **IP SRC:**  210.20.10.5  **|** **IP DST:**  163.10.0.10
