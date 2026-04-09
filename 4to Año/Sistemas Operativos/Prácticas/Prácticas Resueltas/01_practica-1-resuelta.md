@@ -221,4 +221,4 @@ Para acceder al script deberás descomprimir este archivo y montarlo como si fue
 
 > Práctica 1 terminada!
 
-![alt text](image.png)
+![alt text](img/fin_tp1.png)
