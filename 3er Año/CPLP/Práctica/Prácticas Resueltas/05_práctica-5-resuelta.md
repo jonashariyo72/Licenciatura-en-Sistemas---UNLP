@@ -28,7 +28,24 @@
 
 ![alt text](img/ej2-1_tp5.png)
 
+### Ejercicio 3: Sea el siguiente programa escrito en Pascal-like. Realice la pila de ejecución 
+### a) Siguiendo la cadena estática 
+### b) Siguiendo la cadena dinámica 
 
+![Ej3](img/enunciado-ej3_tp5.png)
 
-![Pila Est. Ej. 5](/img/ej3_tp5.drawio.png)
+![Pilas Ej.3](img/ej3_tp5.png)
 
+### Ejercicio 4: Sea el siguiente programa escrito en Pascal-like. Realice la pila de ejecución 
+### a) Siguiendo la cadena estática 
+### b) Siguiendo la cadena dinámica 
+![alt text](img/enunciado-ej4_tp5.png)
+
+### Ejercicio 5: Sea el siguiente programa escrito en Pascal-like. Realice la pila de ejecución 
+### a) Siguiendo la cadena estática 
+### b) Siguiendo la cadena dinámica 
+### c) La sentencia x:= c + 5 +x, podría reemplazarse por x:= x + c + 5? Justifique la respuesta 
+
+![alt text](img/enunciado-ej5_tp5.png)
+
+![alt text](img/ej5_tp5.png)
